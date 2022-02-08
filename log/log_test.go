@@ -7,7 +7,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		config *Config
 		fail   bool
 	}{

@@ -1,8 +1,9 @@
 package router
 
 import (
-	"github.com/labstack/echo/v4"
 	"testing"
+
+	"github.com/labstack/echo/v4"
 )
 
 func TestRouter(t *testing.T) {
@@ -11,7 +12,7 @@ func TestRouter(t *testing.T) {
 	r := &Router{}
 	r.Routes = []Route{{Name: name}, {Name: otherName}}
 
-	var tests = []struct {
+	tests := []struct {
 		input    *Route
 		expected string
 	}{

@@ -7,7 +7,7 @@ import (
 func TestNew(t *testing.T) {
 	c := New()
 
-	var tests = []struct {
+	tests := []struct {
 		input    string
 		expected string
 	}{

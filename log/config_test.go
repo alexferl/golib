@@ -15,7 +15,7 @@ func TestConfig_AddFlags(t *testing.T) {
 	out, _ := fs.GetString("log-output")
 	writer, _ := fs.GetString("log-writer")
 
-	var tests = []struct {
+	tests := []struct {
 		input    string
 		expected string
 	}{

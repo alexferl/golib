@@ -9,13 +9,11 @@ type Config struct {
 	LogWriter string
 }
 
-var (
-	DefaultConfig = &Config{
-		LogLevel:  "info",
-		LogOutput: "stdout",
-		LogWriter: "console",
-	}
-)
+var DefaultConfig = &Config{
+	LogLevel:  "info",
+	LogOutput: "stdout",
+	LogWriter: "console",
+}
 
 // BindFlags adds all the flags from the command line
 func (c *Config) BindFlags(fs *pflag.FlagSet) {

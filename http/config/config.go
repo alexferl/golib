@@ -17,29 +17,27 @@ type Config struct {
 	GracefulTimeout uint
 }
 
-var (
-	DefaultConfig = &Config{
-		BindAddress: net.ParseIP("127.0.0.1"),
-		BindPort:    1323,
-		CORSEnabled: false,
-		CORS: middleware.CORSConfig{
-			AllowOrigins: []string{"*"},
-			AllowMethods: []string{
-				http.MethodGet,
-				http.MethodHead,
-				http.MethodPut,
-				http.MethodPatch,
-				http.MethodPost,
-				http.MethodDelete,
-			},
-			AllowHeaders:     []string{},
-			AllowCredentials: false,
-			ExposeHeaders:    []string{},
-			MaxAge:           0,
+var DefaultConfig = &Config{
+	BindAddress: net.ParseIP("127.0.0.1"),
+	BindPort:    1323,
+	CORSEnabled: false,
+	CORS: middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{
+			http.MethodGet,
+			http.MethodHead,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodPost,
+			http.MethodDelete,
 		},
-		GracefulTimeout: 30,
-	}
-)
+		AllowHeaders:     []string{},
+		AllowCredentials: false,
+		ExposeHeaders:    []string{},
+		MaxAge:           0,
+	},
+	GracefulTimeout: 30,
+}
 
 // BindFlags adds all the flags from the command line
 func (c *Config) BindFlags(fs *pflag.FlagSet) {

@@ -16,13 +16,11 @@ type Config struct {
 	EnvVarPrefix string
 }
 
-var (
-	DefaultConfig = &Config{
-		AppName:      "app",
-		EnvName:      "dev",
-		EnvVarPrefix: "app",
-	}
-)
+var DefaultConfig = &Config{
+	AppName:      "app",
+	EnvName:      "dev",
+	EnvVarPrefix: "app",
+}
 
 // New creates a Config instance
 func New() *Config {
