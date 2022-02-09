@@ -33,7 +33,7 @@ func (s *Server) Start(r *router.Router) {
 
 	// Start server
 	go func() {
-		addr := fmt.Sprintf("%s:%s", viper.GetString("bind-address"), viper.GetString("bind-port"))
+		addr := fmt.Sprintf("%s:%s", viper.GetString("http-bind-address"), viper.GetString("http-bind-port"))
 		if err := s.Echo.Start(addr); err != nil {
 			s.Echo.Logger.Info("Received signal, shutting down the server")
 		}
@@ -44,7 +44,7 @@ func (s *Server) Start(r *router.Router) {
 
 	<-sig
 
-	timeout := time.Duration(viper.GetInt64("graceful-timeout")) * time.Second
+	timeout := time.Duration(viper.GetInt64("http-graceful-timeout")) * time.Second
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
