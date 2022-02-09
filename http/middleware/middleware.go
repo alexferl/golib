@@ -15,18 +15,18 @@ func Register(e *echo.Echo) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
 
-	if viper.GetBool("cors-enabled") {
+	if viper.GetBool("http-cors-enabled") {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     viper.GetStringSlice("cors-allow-origins"),
-			AllowMethods:     viper.GetStringSlice("cors-allow-methods"),
-			AllowHeaders:     viper.GetStringSlice("cors-allow-headers"),
-			AllowCredentials: viper.GetBool("cors-allow-credentials"),
-			ExposeHeaders:    viper.GetStringSlice("cors-expose-headers"),
-			MaxAge:           viper.GetInt("cors-max-age"),
+			AllowOrigins:     viper.GetStringSlice("http-cors-allow-origins"),
+			AllowMethods:     viper.GetStringSlice("http-cors-allow-methods"),
+			AllowHeaders:     viper.GetStringSlice("http-cors-allow-headers"),
+			AllowCredentials: viper.GetBool("http-cors-allow-credentials"),
+			ExposeHeaders:    viper.GetStringSlice("http-cors-expose-headers"),
+			MaxAge:           viper.GetInt("http-cors-max-age"),
 		}))
 	}
 
-	if !viper.GetBool("log-requests-disabled") {
+	if !viper.GetBool("http-log-requests-disabled") {
 		logger := lecho.New(
 			os.Stdout,
 			lecho.WithCaller(),
