@@ -13,18 +13,16 @@ import (
 type Config struct {
 	AppName      string
 	EnvName      string
-	EnvVarPrefix string
-}
-
-var DefaultConfig = &Config{
-	AppName:      "app",
-	EnvName:      "local",
-	EnvVarPrefix: "app",
+	envVarPrefix string
 }
 
 // New creates a Config instance
-func New() *Config {
-	return DefaultConfig
+func New(envVarPrefix string) *Config {
+	return &Config{
+		AppName:      "app",
+		EnvName:      "local",
+		envVarPrefix: envVarPrefix,
+	}
 }
 
 // bindFlags adds all the flags from the command line
@@ -32,8 +30,6 @@ func (c *Config) bindFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.AppName, "app-name", c.AppName, "The name of the application.")
 	fs.StringVar(&c.EnvName, "env-name", c.EnvName, "The environment of the application. "+
 		"Used to load the right configs file.")
-	fs.StringVar(&c.EnvVarPrefix, "env-var-prefix", c.EnvVarPrefix,
-		"Used to prefix environment variables.")
 }
 
 // wordSepNormalizeFunc changes all flags that contain "_" separators
@@ -64,7 +60,7 @@ func (c *Config) BindFlags(flagSets ...func(fs *pflag.FlagSet)) error {
 		return errors.New("application name cannot be empty")
 	}
 
-	viper.SetEnvPrefix(n)
+	viper.SetEnvPrefix(c.envVarPrefix)
 	replacer := strings.NewReplacer("-", "_")
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
