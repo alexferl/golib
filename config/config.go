@@ -18,7 +18,7 @@ type Config struct {
 
 var DefaultConfig = &Config{
 	AppName:      "app",
-	EnvName:      "dev",
+	EnvName:      "local",
 	EnvVarPrefix: "app",
 }
 
