@@ -11,9 +11,13 @@ import (
 )
 
 // Register middleware with Echo.
-func Register(e *echo.Echo) {
-	e.Use(middleware.Recover())
-	e.Use(middleware.RequestID())
+func Register(e *echo.Echo, mw ...echo.MiddlewareFunc) {
+	mws := []echo.MiddlewareFunc{
+		middleware.Recover(),
+		middleware.RequestID(),
+	}
+	mws = append(mw, mw...)
+	e.Use(mws...)
 
 	if viper.GetBool("http-cors-enabled") {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

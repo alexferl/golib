@@ -21,16 +21,15 @@ type Server struct {
 	*config.Config
 }
 
-func New() *Server {
+func New(r *router.Router, mw ...echo.MiddlewareFunc) *Server {
 	e := echo.New()
+	middleware.Register(e, mw...)
+	router.Register(e, r)
 	return &Server{e, config.DefaultConfig}
 }
 
 // Start starts the echo HTTP server.
-func (s *Server) Start(r *router.Router) {
-	middleware.Register(s.Echo)
-	router.Register(s.Echo, r)
-
+func (s *Server) Start() {
 	// Start server
 	go func() {
 		addr := fmt.Sprintf("%s:%s", viper.GetString("http-bind-address"), viper.GetString("http-bind-port"))
