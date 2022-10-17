@@ -2,7 +2,7 @@ package log
 
 import "github.com/spf13/pflag"
 
-// Config holds all log configuration
+// Config holds all log configuration.
 type Config struct {
 	LogLevel  string
 	LogOutput string
@@ -15,7 +15,7 @@ var DefaultConfig = &Config{
 	LogWriter: "console",
 }
 
-// BindFlags adds all the flags from the command line
+// BindFlags adds all the flags from the command line.
 func (c *Config) BindFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.LogOutput, "log-output", c.LogOutput, "The output to write to. "+
 		"'stdout' means log to stdout, 'stderr' means log to stderr.")

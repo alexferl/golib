@@ -11,7 +11,7 @@ import (
 )
 
 // New initializes the logger based on the passed Config,
-// defaults to DefaultConfig if `config` is nil
+// defaults to DefaultConfig if `config` is nil.
 func New(config *Config) error {
 	if config == nil {
 		config = DefaultConfig

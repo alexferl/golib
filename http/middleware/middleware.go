@@ -10,7 +10,7 @@ import (
 	"github.com/ziflex/lecho/v3"
 )
 
-// Register middleware with echo
+// Register middleware with Echo.
 func Register(e *echo.Echo) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())

@@ -20,28 +20,21 @@ type Route struct {
 }
 
 type Router struct {
-	Routes []Route
+	Routes []*Route
 }
 
 func (r *Router) FindRouteByName(name string) *Route {
-	for _, r := range r.Routes {
-		if r.Name == name {
-			return &r
+	for _, route := range r.Routes {
+		if route.Name == name {
+			return route
 		}
 	}
-
 	return nil
 }
 
-type Handler struct{}
-
-var handler Handler
-
-// Register routes with echo
-func Register(e *echo.Echo, router *Router) *Handler {
+// Register routes with Echo.
+func Register(e *echo.Echo, router *Router) {
 	for _, route := range router.Routes {
 		e.Add(route.Method, route.Pattern, route.HandlerFunc)
 	}
-
-	return &handler
 }

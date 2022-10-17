@@ -9,27 +9,27 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config holds all configuration for our program
+// Config holds all configuration for our program.
 type Config struct {
 	*xconfig.Config
 	MyKey string
 }
 
-// NewConfig creates a Config instance
+// NewConfig creates a Config instance.
 func NewConfig() *Config {
 	c := &Config{
-		Config: xconfig.New(),
+		Config: xconfig.New("app"),
 		MyKey:  "value",
 	}
 	return c
 }
 
-// addFlags adds all the flags from the command line
+// addFlags adds all the flags from the command line.
 func (c *Config) addFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.MyKey, "mykey", c.MyKey, "My key.")
 }
 
-// BindFlags normalizes and parses the command line flags
+// BindFlags normalizes and parses the command line flags.
 func (c *Config) BindFlags() {
 	c.addFlags(pflag.CommandLine)
 	err := c.Config.BindFlags() // Bind the default flags from x/config

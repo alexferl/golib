@@ -9,14 +9,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config holds all global configuration for our program
+// Config holds all global configuration for our program.
 type Config struct {
 	AppName      string
 	EnvName      string
 	envVarPrefix string
 }
 
-// New creates a Config instance
+// New creates a Config instance.
 func New(envVarPrefix string) *Config {
 	return &Config{
 		AppName:      "app",
@@ -25,14 +25,14 @@ func New(envVarPrefix string) *Config {
 	}
 }
 
-// bindFlags adds all the flags from the command line
+// bindFlags adds all the flags from the command line.
 func (c *Config) bindFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.AppName, "app-name", c.AppName, "The name of the application.")
 	fs.StringVar(&c.EnvName, "env-name", c.EnvName, "The environment of the application. "+
 		"Used to load the right configs file.")
 }
 
-// wordSepNormalizeFunc changes all flags that contain "_" separators
+// wordSepNormalizeFunc changes all flags that contain "_" separators.
 func wordSepNormalizeFunc(f *pflag.FlagSet, name string) pflag.NormalizedName {
 	if strings.Contains(name, "_") {
 		return pflag.NormalizedName(strings.Replace(name, "_", "-", -1))
@@ -40,7 +40,7 @@ func wordSepNormalizeFunc(f *pflag.FlagSet, name string) pflag.NormalizedName {
 	return pflag.NormalizedName(name)
 }
 
-// BindFlags normalizes and parses the command line flags
+// BindFlags normalizes and parses the command line flags.
 func (c *Config) BindFlags(flagSets ...func(fs *pflag.FlagSet)) error {
 	for _, flagSet := range flagSets {
 		flagSet(pflag.CommandLine)
@@ -71,7 +71,7 @@ func (c *Config) BindFlags(flagSets ...func(fs *pflag.FlagSet)) error {
 	viper.AddConfigPath("./configs")
 	viper.AddConfigPath("/configs")
 
-	if err := viper.ReadInConfig(); err != nil {
+	if err = viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			return errors.New(fmt.Sprintf("config file not found: '%v'", err))
 		} else {

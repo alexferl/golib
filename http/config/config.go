@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// Config holds all http configuration
+// Config holds all HTTP configuration.
 type Config struct {
 	BindAddress         net.IP
 	BindPort            uint
@@ -41,7 +41,7 @@ var DefaultConfig = &Config{
 	LogRequestsDisabled: false,
 }
 
-// BindFlags adds all the flags from the command line
+// BindFlags adds all the flags from the command line.
 func (c *Config) BindFlags(fs *pflag.FlagSet) {
 	fs.IPVar(&c.BindAddress, "http-bind-address", c.BindAddress, "The IP address to listen at.")
 	fs.UintVar(&c.BindPort, "http-bind-port", c.BindPort, "The port to listen at.")

@@ -5,15 +5,15 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	c := New()
+	c := New("app")
 
 	tests := []struct {
 		input    string
 		expected string
 	}{
-		{DefaultConfig.AppName, c.AppName},
-		{DefaultConfig.EnvName, c.EnvName},
-		{DefaultConfig.EnvVarPrefix, c.EnvVarPrefix},
+		{"app", c.AppName},
+		{"local", c.EnvName},
+		{"app", c.envVarPrefix},
 	}
 
 	for _, tc := range tests {

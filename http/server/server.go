@@ -26,7 +26,7 @@ func New() *Server {
 	return &Server{e, config.DefaultConfig}
 }
 
-// Start starts the echo HTTP server
+// Start starts the echo HTTP server.
 func (s *Server) Start(r *router.Router) {
 	middleware.Register(s.Echo)
 	router.Register(s.Echo, r)

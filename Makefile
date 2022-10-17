@@ -15,21 +15,23 @@ help:
 	@echo "make pre-commit"
 	@echo "	run pre-commit hooks"
 
-SUBDIRS := $(wildcard */)
+DIRS := $(wildcard */)
 define FOREACH
-	for DIR in $(SUBDIRS); do \
+	for DIR in $(DIRS); do \
   		cd $$DIR && $(1) && cd $(CURDIR); \
   	done
 endef
 
 check-gofumpt:
+	@echo
 ifeq (, $(shell which gofumpt))
 	$(error "No gofumpt in $(PATH), gofumpt (https://pkg.go.dev/mvdan.cc/gofumpt) is required")
 endif
 
 check-pre-commit:
+	@echo
 ifeq (, $(shell which pre-commit))
- 	$(error "No pre-commit in $(PATH), pre-commit (https://pre-commit.com) is required")
+	$(error "No pre-commit in $(PATH), pre-commit (https://pre-commit.com) is required")
 endif
 
 checks: check-gofumpt check-pre-commit
@@ -38,13 +40,13 @@ dev: checks
 	pre-commit install
 
 test:
-	$(call FOREACH,go test -v)
+	$(call FOREACH,go test -v ./...)
 
 cover:
-	$(call FOREACH,go test -cover -v)
+	$(call FOREACH,go test -cover -v ./...)
 
 tidy:
-	$(call FOREACH,go mod tidy -compat=1.17)
+	$(call FOREACH,go mod tidy)
 
 fmt: check-gofumpt
 	gofumpt -l -w .
