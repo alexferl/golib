@@ -77,13 +77,15 @@ func (h *OpenAPI) Validate(c echo.Context, code int, v any) error {
 	} else if h.Config.ContentType == ApplicationXML {
 		b, err = xml.Marshal(v)
 	} else {
-		panic(fmt.Sprintf("content-type %s not supported", h.Config.ContentType))
+		panic(fmt.Sprintf("error content-type %s not supported", h.Config.ContentType))
 	}
 
 	if err != nil {
 		log.Error().Msgf("error marshaling response: %v", err)
 		return err
 	}
+
+	c.Response().Header().Add("Content-Type", h.Config.ContentType)
 
 	responseValidationInput.SetBodyBytes(b)
 	ctx := context.Background()
