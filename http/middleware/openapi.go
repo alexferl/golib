@@ -9,7 +9,6 @@ import (
 	"github.com/getkin/kin-openapi/routers"
 	"github.com/getkin/kin-openapi/routers/gorillamux"
 	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
 )
 
 type OpenAPIConfig struct {
@@ -38,25 +37,25 @@ func OpenAPIWithConfig(config OpenAPIConfig) echo.MiddlewareFunc {
 			loader := &openapi3.Loader{Context: ctx, IsExternalRefsAllowed: true}
 			schema, err := loader.LoadFromFile(config.File)
 			if err != nil {
-				log.Error().Msgf("error loading schema file: %v", err)
+				c.Logger().Errorf("error loading schema file: %v", err)
 				return err
 			}
 
 			err = schema.Validate(ctx)
 			if err != nil {
-				log.Error().Msgf("error validating schema: %v", err)
+				c.Logger().Errorf("error validating schema: %v", err)
 				return err
 			}
 
 			r, err := gorillamux.NewRouter(schema)
 			if err != nil {
-				log.Error().Msgf("error creating router: %v", err)
+				c.Logger().Errorf("error creating router: %v", err)
 				return err
 			}
 
 			route, pathParams, err := r.FindRoute(c.Request())
 			if err != nil {
-				log.Debug().Msgf("error finding route: %v", err)
+				c.Logger().Debugf("error finding route: %v", err)
 
 				if err == routers.ErrPathNotFound {
 					m := &Error{Message: "route not found"}
@@ -77,7 +76,7 @@ func OpenAPIWithConfig(config OpenAPIConfig) echo.MiddlewareFunc {
 			}
 			err = openapi3filter.ValidateRequest(ctx, requestValidationInput)
 			if err != nil {
-				log.Debug().Msgf("error validating request: %v", err)
+				c.Logger().Debugf("error validating request: %v", err)
 				return err
 			}
 

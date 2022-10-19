@@ -8,7 +8,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -81,7 +80,7 @@ func (h *OpenAPI) Validate(c echo.Context, code int, v any) error {
 	}
 
 	if err != nil {
-		log.Error().Msgf("error marshaling response: %v", err)
+		c.Logger().Errorf("error marshaling response: %v", err)
 		return err
 	}
 
@@ -91,7 +90,7 @@ func (h *OpenAPI) Validate(c echo.Context, code int, v any) error {
 	ctx := context.Background()
 	err = openapi3filter.ValidateResponse(ctx, responseValidationInput)
 	if err != nil {
-		log.Debug().Msgf("error validating response: %v", err)
+		c.Logger().Debug("error validating response: %v", err)
 		return err
 	}
 
