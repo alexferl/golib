@@ -17,6 +17,9 @@ type Route struct {
 
 	// HandlerFunc is the handler function of this route.
 	HandlerFunc echo.HandlerFunc
+
+	// MiddlewareFunc is route-level middleware.
+	MiddlewareFunc []echo.MiddlewareFunc
 }
 
 type Router struct {
@@ -34,7 +37,8 @@ func (r *Router) FindRouteByName(name string) *Route {
 
 // Register routes with Echo.
 func Register(e *echo.Echo, router *Router) {
+	e.Routes()
 	for _, route := range router.Routes {
-		e.Add(route.Method, route.Pattern, route.HandlerFunc)
+		e.Add(route.Method, route.Pattern, route.HandlerFunc, route.MiddlewareFunc...)
 	}
 }

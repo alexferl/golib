@@ -33,6 +33,7 @@ func TestRegister(t *testing.T) {
 	otherName := "OtherRoute"
 	r := &Router{}
 	h := func(c echo.Context) error { return nil }
+
 	r.Routes = []*Route{
 		{Name: name, Pattern: "/1", HandlerFunc: h},
 		{Name: otherName, Pattern: "/2", HandlerFunc: h},
