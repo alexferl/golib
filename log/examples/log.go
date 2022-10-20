@@ -3,18 +3,18 @@ package main
 import (
 	"fmt"
 
-	xlog "github.com/alexferl/golib/log"
+	liblog "github.com/alexferl/golib/log"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/pflag"
 )
 
 func main() {
-	c := xlog.DefaultConfig // use default settings
-	// c := &xlog.Config{LogWriter: "json"} // use custom settings
+	c := liblog.DefaultConfig // use default settings
+	// c := &liblog.Config{LogWriter: "json"} // use custom settings
 	c.BindFlags(pflag.CommandLine)
 	pflag.Parse()
 
-	err := xlog.New(c)
+	err := liblog.New(c)
 	if err != nil {
 		panic(fmt.Sprintf("Error initializing logger: '%v'", err))
 	}

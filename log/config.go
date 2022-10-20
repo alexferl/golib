@@ -15,12 +15,18 @@ var DefaultConfig = &Config{
 	LogWriter: "console",
 }
 
+const (
+	LogOutput = "log-output"
+	LogWriter = "log-writer"
+	LogLevel  = "log-level"
+)
+
 // BindFlags adds all the flags from the command line.
 func (c *Config) BindFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&c.LogOutput, "log-output", c.LogOutput, "The output to write to. "+
+	fs.StringVar(&c.LogOutput, LogOutput, c.LogOutput, "The output to write to. "+
 		"'stdout' means log to stdout, 'stderr' means log to stderr.")
-	fs.StringVar(&c.LogWriter, "log-writer", c.LogWriter,
+	fs.StringVar(&c.LogWriter, LogWriter, c.LogWriter,
 		"The log writer. Valid writers are: 'console' and 'json'.")
-	fs.StringVar(&c.LogLevel, "log-level", c.LogLevel, "The granularity of log outputs. "+
+	fs.StringVar(&c.LogLevel, LogLevel, c.LogLevel, "The granularity of log outputs. "+
 		"Valid log levels: 'panic', 'fatal', 'error', 'warn', 'info', 'debug' and 'trace'.")
 }

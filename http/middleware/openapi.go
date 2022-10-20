@@ -9,6 +9,8 @@ import (
 	"github.com/getkin/kin-openapi/routers"
 	"github.com/getkin/kin-openapi/routers/gorillamux"
 	"github.com/labstack/echo/v4"
+
+	"github.com/alexferl/golib/http/handler"
 )
 
 type OpenAPIConfig struct {
@@ -18,10 +20,6 @@ type OpenAPIConfig struct {
 
 var DefaultOpenAPIConfig = OpenAPIConfig{
 	ContextKey: "validator",
-}
-
-type Error struct {
-	Message string `json:"error" xml:"error"`
 }
 
 func OpenAPI(file string) echo.MiddlewareFunc {
@@ -55,16 +53,14 @@ func OpenAPIWithConfig(config OpenAPIConfig) echo.MiddlewareFunc {
 
 			route, pathParams, err := r.FindRoute(c.Request())
 			if err != nil {
-				c.Logger().Debugf("error finding route: %v", err)
+				c.Logger().Debugf("error finding route for %s: %v", c.Request().URL.String(), err)
 
 				if err == routers.ErrPathNotFound {
-					m := &Error{Message: "route not found"}
-					return c.JSON(http.StatusNotFound, m)
+					return handler.HTTPError(c, http.StatusNotFound, "route not found")
 				}
 
 				if err == routers.ErrMethodNotAllowed {
-					m := &Error{Message: "method not allowed"}
-					return c.JSON(http.StatusMethodNotAllowed, m)
+					return handler.HTTPError(c, http.StatusMethodNotAllowed, "method not allowed")
 				}
 				return err
 			}

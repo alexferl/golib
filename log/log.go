@@ -1,7 +1,6 @@
 package log
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -40,7 +39,7 @@ func New(config *Config) error {
 	case "stderr":
 		f = os.Stderr
 	default:
-		return errors.New(fmt.Sprintf("Unknown log-output '%s'", logOutput))
+		return fmt.Errorf("unknown log-output '%s'", logOutput)
 	}
 
 	logger := zerolog.New(f)
@@ -51,7 +50,7 @@ func New(config *Config) error {
 	case "json":
 		break
 	default:
-		return errors.New(fmt.Sprintf("Unknown log-writer '%s'", logWriter))
+		return fmt.Errorf("unknown log-writer '%s'", logWriter)
 	}
 
 	log.Logger = logger.With().Timestamp().Caller().Logger()
@@ -72,7 +71,7 @@ func New(config *Config) error {
 	case "trace":
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
 	default:
-		return errors.New(fmt.Sprintf("Unknown log-level '%s'", logLevel))
+		return fmt.Errorf("unknown log-level '%s'", logLevel)
 	}
 
 	return nil

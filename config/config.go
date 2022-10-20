@@ -25,10 +25,15 @@ func New(envVarPrefix string) *Config {
 	}
 }
 
+const (
+	AppName = "app-name"
+	EnvName = "env-name"
+)
+
 // bindFlags adds all the flags from the command line.
 func (c *Config) bindFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&c.AppName, "app-name", c.AppName, "The name of the application.")
-	fs.StringVar(&c.EnvName, "env-name", c.EnvName, "The environment of the application. "+
+	fs.StringVar(&c.AppName, AppName, c.AppName, "The name of the application.")
+	fs.StringVar(&c.EnvName, EnvName, c.EnvName, "The environment of the application. "+
 		"Used to load the right configs file.")
 }
 
