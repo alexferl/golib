@@ -28,9 +28,9 @@ func New(config *Config) error {
 		config.LogWriter = DefaultConfig.LogWriter
 	}
 
-	logLevel := strings.ToLower(config.LogLevel)
 	logOutput := strings.ToLower(config.LogOutput)
 	logWriter := strings.ToLower(config.LogWriter)
+	logLevel := strings.ToUpper(config.LogLevel)
 
 	var f *os.File
 	switch logOutput {
@@ -44,7 +44,7 @@ func New(config *Config) error {
 
 	logger := zerolog.New(f)
 
-	switch strings.ToLower(logWriter) {
+	switch logWriter {
 	case "console":
 		logger = log.Output(zerolog.ConsoleWriter{Out: f})
 	case "json":
@@ -55,20 +55,20 @@ func New(config *Config) error {
 
 	log.Logger = logger.With().Timestamp().Caller().Logger()
 
-	switch strings.ToLower(logLevel) {
-	case "panic":
+	switch logLevel {
+	case "PANIC":
 		zerolog.SetGlobalLevel(zerolog.PanicLevel)
-	case "fatal":
+	case "FATAL":
 		zerolog.SetGlobalLevel(zerolog.FatalLevel)
-	case "error":
+	case "ERROR":
 		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
-	case "warn":
+	case "WARN":
 		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	case "info":
+	case "INFO":
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	case "debug":
+	case "DEBUG":
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	case "trace":
+	case "TRACE":
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
 	default:
 		return fmt.Errorf("unknown log-level '%s'", logLevel)

@@ -28,5 +28,5 @@ func (c *Config) BindFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.LogWriter, LogWriter, c.LogWriter,
 		"The log writer. Valid writers are: 'console' and 'json'.")
 	fs.StringVar(&c.LogLevel, LogLevel, c.LogLevel, "The granularity of log outputs. "+
-		"Valid log levels: 'panic', 'fatal', 'error', 'warn', 'info', 'debug' and 'trace'.")
+		"Valid log levels: 'PANIC', 'FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG' and 'TRACE'.")
 }
