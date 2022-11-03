@@ -10,7 +10,7 @@ type Config struct {
 }
 
 var DefaultConfig = &Config{
-	LogLevel:  "info",
+	LogLevel:  "INFO",
 	LogOutput: "stdout",
 	LogWriter: "console",
 }
