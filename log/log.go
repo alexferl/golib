@@ -4,9 +4,21 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+)
+
+const (
+	PanicLevel = "PANIC"
+	FatalLevel = "FATAL"
+	ErrorLevel = "ERROR"
+	WarnLevel  = "WARN"
+	InfoLevel  = "INFO"
+	DebugLevel = "DEBUG"
+	TraceLevel = "TRACE"
+	Disabled   = "DISABLED"
 )
 
 // New initializes the logger based on the passed Config,
@@ -46,7 +58,9 @@ func New(config *Config) error {
 
 	switch logWriter {
 	case "console":
-		logger = log.Output(zerolog.ConsoleWriter{Out: f})
+		logger = log.Output(zerolog.ConsoleWriter{
+			Out: f, TimeFormat: time.RFC3339Nano,
+		})
 	case "json":
 		break
 	default:
@@ -56,20 +70,22 @@ func New(config *Config) error {
 	log.Logger = logger.With().Timestamp().Caller().Logger()
 
 	switch logLevel {
-	case "PANIC":
+	case PanicLevel:
 		zerolog.SetGlobalLevel(zerolog.PanicLevel)
-	case "FATAL":
+	case FatalLevel:
 		zerolog.SetGlobalLevel(zerolog.FatalLevel)
-	case "ERROR":
+	case ErrorLevel:
 		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
-	case "WARN":
+	case WarnLevel:
 		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	case "INFO":
+	case InfoLevel:
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	case "DEBUG":
+	case DebugLevel:
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	case "TRACE":
+	case TraceLevel:
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	case Disabled:
+		zerolog.SetGlobalLevel(zerolog.Disabled)
 	default:
 		return fmt.Errorf("unknown log-level '%s'", logLevel)
 	}

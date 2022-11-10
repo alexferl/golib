@@ -1,6 +1,10 @@
 package log
 
-import "github.com/spf13/pflag"
+import (
+	"fmt"
+
+	"github.com/spf13/pflag"
+)
 
 // Config holds all log configuration.
 type Config struct {
@@ -10,7 +14,7 @@ type Config struct {
 }
 
 var DefaultConfig = &Config{
-	LogLevel:  "INFO",
+	LogLevel:  InfoLevel,
 	LogOutput: "stdout",
 	LogWriter: "console",
 }
@@ -27,6 +31,7 @@ func (c *Config) BindFlags(fs *pflag.FlagSet) {
 		"'stdout' means log to stdout, 'stderr' means log to stderr.")
 	fs.StringVar(&c.LogWriter, LogWriter, c.LogWriter,
 		"The log writer. Valid writers are: 'console' and 'json'.")
-	fs.StringVar(&c.LogLevel, LogLevel, c.LogLevel, "The granularity of log outputs. "+
-		"Valid log levels: 'PANIC', 'FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG' and 'TRACE'.")
+	fs.StringVar(&c.LogLevel, LogLevel, c.LogLevel, fmt.Sprintf("The granularity of log outputs. "+
+		"Valid levels: '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'",
+		PanicLevel, FatalLevel, ErrorLevel, WarnLevel, InfoLevel, DebugLevel, TraceLevel, Disabled))
 }

@@ -60,7 +60,7 @@ func (c *Config) BindFlags(flagSets ...func(fs *pflag.FlagSet)) error {
 	pflag.CommandLine.SetNormalizeFunc(wordSepNormalizeFunc)
 	pflag.Parse()
 
-	n := viper.GetString("app-name")
+	n := viper.GetString(AppName)
 	if len(n) < 1 {
 		return errors.New("application name cannot be empty")
 	}
@@ -70,7 +70,7 @@ func (c *Config) BindFlags(flagSets ...func(fs *pflag.FlagSet)) error {
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
 
-	configName := fmt.Sprintf("config.%s", strings.ToLower(viper.GetString("env-name")))
+	configName := fmt.Sprintf("config.%s", strings.ToLower(viper.GetString(EnvName)))
 	viper.SetConfigName(configName)
 	viper.SetConfigType("toml")
 	viper.AddConfigPath("./configs")

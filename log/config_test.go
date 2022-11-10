@@ -11,9 +11,9 @@ func TestConfig_AddFlags(t *testing.T) {
 	fs := &pflag.FlagSet{}
 	c.BindFlags(fs)
 
-	level, _ := fs.GetString("log-level")
-	out, _ := fs.GetString("log-output")
-	writer, _ := fs.GetString("log-writer")
+	level, _ := fs.GetString(LogLevel)
+	out, _ := fs.GetString(LogOutput)
+	writer, _ := fs.GetString(LogWriter)
 
 	tests := []struct {
 		input    string

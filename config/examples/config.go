@@ -3,21 +3,21 @@ package main
 import (
 	"fmt"
 
-	libconfig "github.com/alexferl/golib/config"
+	libConfig "github.com/alexferl/golib/config"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
 // Config holds all configuration for our program.
 type Config struct {
-	*libconfig.Config
+	*libConfig.Config
 	MyKey string
 }
 
 // NewConfig creates a Config instance.
 func NewConfig() *Config {
 	c := &Config{
-		Config: libconfig.New("app"),
+		Config: libConfig.New("app"),
 		MyKey:  "value",
 	}
 	return c
@@ -44,6 +44,6 @@ func (c *Config) BindFlags() {
 func main() {
 	c := NewConfig()
 	c.BindFlags()
-	fmt.Println(viper.GetString(libconfig.AppName)) // from libconfig, overloaded in configs/config.dev.toml
+	fmt.Println(viper.GetString(libConfig.AppName)) // from libConfig, overloaded in configs/config.dev.toml
 	fmt.Println(viper.GetString(MyKey))
 }
