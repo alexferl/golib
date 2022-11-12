@@ -1,12 +1,9 @@
 package middleware
 
 import (
-	"os"
-	"strings"
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"github.com/ziflex/lecho/v3"
 
@@ -34,29 +31,7 @@ func Register(e *echo.Echo, mw ...echo.MiddlewareFunc) {
 	}
 
 	if viper.GetBool(config.HTTPLogRequests) {
-		var level log.Lvl
-
-		switch strings.ToUpper(viper.GetString(config.HTTPLogRequestLevel)) {
-		case "DEBUG":
-			level = log.DEBUG
-		case "INFO":
-			level = log.INFO
-		case "WARN":
-			level = log.WARN
-		case "ERROR":
-			level = log.ERROR
-		case "OFF":
-			level = log.OFF
-		default:
-			level = log.INFO
-		}
-
-		logger := lecho.New(
-			os.Stdout,
-			lecho.WithCaller(),
-			lecho.WithTimestamp(),
-			lecho.WithLevel(level),
-		)
+		logger := lecho.From(log.Logger)
 		e.Logger = logger
 		e.Use(lecho.Middleware(lecho.Config{
 			Logger: logger,
