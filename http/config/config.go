@@ -17,7 +17,6 @@ type Config struct {
 	CORSEnabled     bool
 	GracefulTimeout time.Duration
 	LogRequests     bool
-	LogRequestLevel string
 }
 
 var DefaultConfig = &Config{
@@ -41,7 +40,6 @@ var DefaultConfig = &Config{
 	},
 	GracefulTimeout: 30 * time.Second,
 	LogRequests:     true,
-	LogRequestLevel: "INFO",
 }
 
 const (
@@ -49,7 +47,6 @@ const (
 	HTTPBindPort             = "http-bind-port"
 	HTTPGracefulTimeout      = "http-graceful-timeout"
 	HTTPLogRequests          = "http-log-requests"
-	HTTPLogRequestLevel      = "http-log-request-level"
 	HTTPCORSEnabled          = "http-cors-enabled"
 	HTTPCORSAllowOrigins     = "http-cors-allow-origins"
 	HTTPCORSAllowMethods     = "http-cors-allow-methods"
@@ -65,8 +62,6 @@ func (c *Config) BindFlags(fs *pflag.FlagSet) {
 	fs.UintVar(&c.BindPort, HTTPBindPort, c.BindPort, "The port to listen at.")
 	fs.DurationVar(&c.GracefulTimeout, HTTPGracefulTimeout, c.GracefulTimeout, "Timeout for graceful shutdown.")
 	fs.BoolVar(&c.LogRequests, HTTPLogRequests, c.LogRequests, "Controls the logging of HTTP requests")
-	fs.StringVar(&c.LogRequestLevel, HTTPLogRequestLevel, c.LogRequestLevel, "The granularity of log outputs. "+
-		"Valid log levels: 'OFF', 'ERROR', 'WARN', 'INFO', 'DEBUG'.")
 	fs.BoolVar(&c.CORSEnabled, HTTPCORSEnabled, c.CORSEnabled, "Enable cross-origin resource sharing.")
 	fs.StringSliceVar(&c.CORS.AllowOrigins, HTTPCORSAllowOrigins, c.CORS.AllowOrigins,
 		"Indicates whether the response can be shared with requesting code from the given origin.")
