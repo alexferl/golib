@@ -70,6 +70,16 @@ func (c *Config) BindFlags(flagSets ...func(fs *pflag.FlagSet)) error {
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
 
+	return nil
+}
+
+// BindFlagsWithConfigPaths normalizes, parses the command line flags and read in config files.
+func (c *Config) BindFlagsWithConfigPaths(flagSets ...func(fs *pflag.FlagSet)) error {
+	err := c.BindFlags(flagSets...)
+	if err != nil {
+		return err
+	}
+
 	configName := fmt.Sprintf("config.%s", strings.ToLower(viper.GetString(EnvName)))
 	viper.SetConfigName(configName)
 	viper.SetConfigType("toml")
