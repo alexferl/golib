@@ -37,7 +37,6 @@ func (r *Router) FindRouteByName(name string) *Route {
 
 // Register routes with Echo.
 func Register(e *echo.Echo, router *Router) {
-	e.Routes()
 	for _, route := range router.Routes {
 		e.Add(route.Method, route.Pattern, route.HandlerFunc, route.MiddlewareFunc...)
 	}

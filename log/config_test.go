@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func TestConfig_AddFlags(t *testing.T) {
+func TestConfig_BindFlags(t *testing.T) {
 	c := DefaultConfig
 	fs := &pflag.FlagSet{}
 	c.BindFlags(fs)

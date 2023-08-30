@@ -77,10 +77,9 @@ func (c *Config) BindFlags(flagSets ...func(fs *pflag.FlagSet)) error {
 	viper.AddConfigPath("/configs")
 
 	if err = viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundError) {
 			return errors.New(fmt.Sprintf("config file not found: '%v'", err))
-		} else {
-			return errors.New(fmt.Sprintf("couldn't load config file: '%v'", err))
 		}
 	}
 

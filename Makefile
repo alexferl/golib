@@ -23,13 +23,11 @@ define FOREACH
 endef
 
 check-gofumpt:
-	@echo
 ifeq (, $(shell which gofumpt))
 	$(error "No gofumpt in $(PATH), gofumpt (https://pkg.go.dev/mvdan.cc/gofumpt) is required")
 endif
 
 check-pre-commit:
-	@echo
 ifeq (, $(shell which pre-commit))
 	$(error "No pre-commit in $(PATH), pre-commit (https://pre-commit.com) is required")
 endif
