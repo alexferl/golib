@@ -101,8 +101,13 @@ func New() *Server {
 
 // Start starts the echo HTTP server.
 func (s *Server) Start() {
-	s.Add(http.MethodGet, "/readyz", Readyz)
-	s.Add(http.MethodGet, "/livez", Livez)
+	s.Echo.Add(http.MethodGet, "/readyz", Readyz)
+	s.Echo.Add(http.MethodGet, "/livez", Livez)
+
+	log.Info().Msgf(
+		"Server starting at %s",
+		fmt.Sprintf("%s:%d", viper.GetString(config.HTTPBindAddress), viper.GetInt(config.HTTPBindPort)),
+	)
 
 	// Start server
 	go func() {
