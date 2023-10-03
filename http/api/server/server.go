@@ -1,7 +1,13 @@
-package middleware
+package server
 
 import (
+	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -9,11 +15,30 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 
-	"github.com/alexferl/golib/http/config"
+	"github.com/alexferl/golib/http/api/config"
 )
 
-// Register middleware with Echo.
-func Register(e *echo.Echo, mw ...echo.MiddlewareFunc) {
+type Server struct {
+	*echo.Echo
+	*config.Config
+	ReadyzHandler echo.HandlerFunc
+	LivezHandler  echo.HandlerFunc
+}
+
+func Readyz(c echo.Context) error {
+	return c.String(http.StatusOK, "readyz check passed")
+}
+
+func Livez(c echo.Context) error {
+	return c.String(http.StatusOK, "livez check passed")
+}
+
+func New() *Server {
+	e := echo.New()
+
+	e.HideBanner = true
+	e.HidePort = true
+
 	mws := []echo.MiddlewareFunc{
 		middleware.Recover(),
 		middleware.RequestID(),
@@ -69,7 +94,38 @@ func Register(e *echo.Echo, mw ...echo.MiddlewareFunc) {
 		mws = append(mws, logger)
 	}
 
-	mws = append(mws, mw...)
-
 	e.Use(mws...)
+
+	return &Server{e, config.DefaultConfig, Readyz, Livez}
+}
+
+// Start starts the echo HTTP server.
+func (s *Server) Start() {
+	s.Add(http.MethodGet, "/readyz", Readyz)
+	s.Add(http.MethodGet, "/livez", Livez)
+
+	// Start server
+	go func() {
+		addr := fmt.Sprintf(
+			"%s:%s",
+			viper.GetString(config.HTTPBindAddress),
+			viper.GetString(config.HTTPBindPort),
+		)
+		if err := s.Echo.Start(addr); err != nil {
+			s.Echo.Logger.Info("Received signal, shutting down the server")
+		}
+	}()
+
+	sig := make(chan os.Signal)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+
+	<-sig
+
+	timeout := time.Duration(viper.GetInt64(config.HTTPGracefulTimeout)) * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	if err := s.Echo.Shutdown(ctx); err != nil {
+		s.Echo.Logger.Fatal(err)
+	}
 }

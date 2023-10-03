@@ -15,7 +15,7 @@ help:
 	@echo "make pre-commit"
 	@echo "	run pre-commit hooks"
 
-DIRS := $(wildcard */)
+DIRS = $(shell find . -name 'go.mod' -exec dirname {} \;)
 define FOREACH
 	for DIR in $(DIRS); do \
   		cd $$DIR && $(1) && cd $(CURDIR); \
