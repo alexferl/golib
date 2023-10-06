@@ -30,7 +30,7 @@ const (
 
 func (c *Config) BindFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.URI, MongoDBURI, c.URI, "MongoDB URI")
-	fs.StringVar(&c.AppName, MongoDBAppName, c.URI, "MongoDB app name")
+	fs.StringVar(&c.AppName, MongoDBAppName, c.AppName, "MongoDB app name")
 	fs.StringVar(&c.Username, MongoDBUsername, c.Username, "MongoDB username")
 	fs.StringVar(&c.Password, MongoDBPassword, c.Password, "MongoDB password")
 	fs.StringVar(&c.ReplicaSet, MongoDBReplicaSet, c.ReplicaSet, "MongoDB replica set")
