@@ -15,7 +15,7 @@ func New() (*mongo.Client, error) {
 
 	uri := viper.GetString(MongoDBURI)
 	if uri == "" {
-		uri = "mongodb://localhost:27017"
+		uri = DefaultConfig.URI
 	}
 
 	opts := options.Client()

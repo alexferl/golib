@@ -17,6 +17,17 @@ type Config struct {
 	SocketTimeoutMs          time.Duration // query timeout
 }
 
+var DefaultConfig = &Config{
+	URI:                      "mongodb://localhost:27017",
+	AppName:                  "",
+	Username:                 "",
+	Password:                 "",
+	ReplicaSet:               "",
+	ServerSelectionTimeoutMs: 10 * time.Second,
+	ConnectTimeoutMs:         10 * time.Second,
+	SocketTimeoutMs:          30 * time.Second,
+}
+
 const (
 	MongoDBURI                      = "mongodb-uri"
 	MongoDBAppName                  = "mongodb-app-name"
