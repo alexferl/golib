@@ -21,6 +21,7 @@ import (
 type Server struct {
 	*echo.Echo
 	*config.Config
+
 	ReadyzHandler echo.HandlerFunc
 	LivezHandler  echo.HandlerFunc
 }
@@ -99,15 +100,14 @@ func New() *Server {
 	return &Server{e, config.DefaultConfig, Readyz, Livez}
 }
 
+func (s *Server) addHandlers() {
+	s.Echo.Add(http.MethodGet, "/readyz", s.ReadyzHandler)
+	s.Echo.Add(http.MethodGet, "/livez", s.LivezHandler)
+}
+
 // Start starts the echo HTTP server.
 func (s *Server) Start() {
-	s.Echo.Add(http.MethodGet, "/readyz", Readyz)
-	s.Echo.Add(http.MethodGet, "/livez", Livez)
-
-	log.Info().Msgf(
-		"Server starting at %s",
-		fmt.Sprintf("%s:%d", viper.GetString(config.HTTPBindAddress), viper.GetInt(config.HTTPBindPort)),
-	)
+	s.addHandlers()
 
 	// Start server
 	go func() {
