@@ -17,6 +17,12 @@ type Config struct {
 	CORSEnabled     bool
 	GracefulTimeout time.Duration
 	LogRequests     bool
+	TLS             *TLS
+}
+
+type TLS struct {
+	CertFile string
+	KeyFile  string
 }
 
 var DefaultConfig = &Config{
@@ -40,6 +46,10 @@ var DefaultConfig = &Config{
 	},
 	GracefulTimeout: 30 * time.Second,
 	LogRequests:     true,
+	TLS: &TLS{
+		CertFile: "",
+		KeyFile:  "",
+	},
 }
 
 const (
@@ -54,6 +64,8 @@ const (
 	HTTPCORSAllowCredentials = "http-cors-allow-credentials"
 	HTTPCORSExposeHeaders    = "http-cors-expose-headers"
 	HTTPCORSMaxAge           = "http-cors-max-age"
+	HTTPTLSCertFile          = "http-tls-cert-file"
+	HTTPTLSKeyFile           = "http-tls-key-file"
 )
 
 // BindFlags adds all the flags from the command line.
@@ -76,4 +88,6 @@ func (c *Config) BindFlags(fs *pflag.FlagSet) {
 		"Indicates which headers can be exposed as part of the response by listing their name.")
 	fs.IntVar(&c.CORS.MaxAge, HTTPCORSMaxAge, c.CORS.MaxAge,
 		"Indicates how long the results of a preflight request can be cached.")
+	fs.StringVar(&c.TLS.CertFile, HTTPTLSCertFile, c.TLS.CertFile, "TLS certificate file")
+	fs.StringVar(&c.TLS.KeyFile, HTTPTLSKeyFile, c.TLS.KeyFile, "TLS key file")
 }

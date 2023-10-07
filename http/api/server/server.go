@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -24,6 +25,12 @@ type Server struct {
 
 	ReadyzHandler echo.HandlerFunc
 	LivezHandler  echo.HandlerFunc
+	TLS           *TLS
+}
+
+type TLS struct {
+	CertFile string
+	KeyFile  string
 }
 
 func Readyz(c echo.Context) error {
@@ -97,7 +104,16 @@ func New() *Server {
 
 	e.Use(mws...)
 
-	return &Server{e, config.DefaultConfig, Readyz, Livez}
+	return &Server{
+		e,
+		config.DefaultConfig,
+		Readyz,
+		Livez,
+		&TLS{
+			CertFile: viper.GetString(config.HTTPTLSCertFile),
+			KeyFile:  viper.GetString(config.HTTPTLSKeyFile),
+		},
+	}
 }
 
 func (s *Server) addHandlers() {
@@ -116,7 +132,15 @@ func (s *Server) Start() {
 			viper.GetString(config.HTTPBindAddress),
 			viper.GetString(config.HTTPBindPort),
 		)
-		if err := s.Echo.Start(addr); err != nil {
+
+		var server error
+		if s.TLS.CertFile != "" {
+			server = s.Echo.StartTLS(addr, s.TLS.CertFile, s.TLS.KeyFile)
+		} else {
+			server = s.Echo.Start(addr)
+		}
+
+		if err := server; !errors.Is(err, http.ErrServerClosed) {
 			s.Echo.Logger.Info("Received signal, shutting down the server")
 		}
 	}()
