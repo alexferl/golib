@@ -1,11 +1,21 @@
 package redis
 
 import (
+	"crypto/tls"
+
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 )
 
 func New() (*redis.Client, error) {
+	return newClient(nil)
+}
+
+func NewTLS(tlsConfig *tls.Config) (*redis.Client, error) {
+	return newClient(tlsConfig)
+}
+
+func newClient(tlsConfig *tls.Config) (*redis.Client, error) {
 	var opt *redis.Options
 	var err error
 
@@ -28,6 +38,10 @@ func New() (*redis.Client, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	if tlsConfig != nil {
+		opt.TLSConfig = tlsConfig
 	}
 
 	client := redis.NewClient(opt)
