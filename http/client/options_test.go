@@ -64,8 +64,8 @@ func TestWithHeaders(t *testing.T) {
 }
 
 func TestWithBeforeRequest(t *testing.T) {
-	f := func(req *http.Request) error { return nil }
-	var fns []func(req *http.Request) error
+	f := func(req *http.Request, v ...any) error { return nil }
+	var fns []func(req *http.Request, v ...any) error
 	fns = append(fns, f)
 	c := New(WithBeforeRequest(f))
 
@@ -73,8 +73,8 @@ func TestWithBeforeRequest(t *testing.T) {
 }
 
 func TestWithAfterRequest(t *testing.T) {
-	f := func(resp *Response) error { return nil }
-	var fns []func(resp *Response) error
+	f := func(resp *Response, v ...any) error { return nil }
+	var fns []func(resp *Response, v ...any) error
 	fns = append(fns, f)
 
 	c := New(WithAfterRequest(f))
