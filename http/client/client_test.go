@@ -14,15 +14,16 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rzajac/zltest"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
 	hc := &http.Client{Timeout: 42 * time.Second}
-	url := "https://example.com"
-	auth := "token"
 	acc := "application/xml"
 	typ := "application/xml"
+	auth := "token"
+	url := "https://example.com"
 	headers := map[string]string{
 		"X-Test1": "1",
 		"X-Test2": "2",
@@ -61,7 +62,7 @@ func TestClient_NewRequest(t *testing.T) {
 	assert.Equal(t, payload, body)
 }
 
-func before(req *http.Request, _ ...any) error {
+func before(req *http.Request) error {
 	url, _ := netUrl.Parse("https://example.com/1")
 	req.URL = url
 
@@ -79,7 +80,7 @@ func TestClient_NewRequest_BeforeRequest(t *testing.T) {
 	assert.Equal(t, "https://example.com/1", r.URL.String())
 }
 
-func beforeChain(req *http.Request, _ ...any) error {
+func beforeChain(req *http.Request) error {
 	url, _ := netUrl.Parse("https://example.com/2")
 	req.URL = url
 
@@ -97,7 +98,7 @@ func TestClient_NewRequest_BeforeRequest_Chain(t *testing.T) {
 	assert.Equal(t, "https://example.com/2", r.URL.String())
 }
 
-func beforeErr(_ *http.Request, _ ...any) error {
+func beforeErr(_ *http.Request) error {
 	return fmt.Errorf("some error")
 }
 
@@ -211,7 +212,7 @@ func TestClient_Get_Error(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func after(resp *Response, _ ...any) error {
+func after(resp *Response) error {
 	resp.StatusCode = 201
 	return nil
 }
@@ -229,7 +230,7 @@ func TestClient_Get_AfterRequest(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 }
 
-func afterChain(resp *Response, _ ...any) error {
+func afterChain(resp *Response) error {
 	resp.StatusCode = http.StatusTeapot
 	return nil
 }
@@ -247,7 +248,7 @@ func TestClient_Get_AfterRequest_Chain(t *testing.T) {
 	assert.Equal(t, http.StatusTeapot, resp.StatusCode)
 }
 
-func afterErr(_ *Response, _ ...any) error {
+func afterErr(_ *Response) error {
 	return fmt.Errorf("some error")
 }
 

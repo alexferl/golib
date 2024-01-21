@@ -17,8 +17,8 @@ type options struct {
 	auth          *string
 	baseURL       *string
 	headers       *map[string]string
-	beforeRequest []func(req *http.Request, v ...any) error
-	afterRequest  []func(resp *Response, v ...any) error
+	beforeRequest []func(req *http.Request) error
+	afterRequest  []func(resp *Response) error
 	fmtError      bool
 	logRequest    bool
 	logResponse   bool
@@ -117,7 +117,7 @@ func WithHeaders(m map[string]string) Option {
 // WithBeforeRequest sets a function that will run before every request
 // and has access to the current request to inspect and/or modify it.
 // Can be called multiple times to chain functions.
-func WithBeforeRequest(f func(req *http.Request, v ...any) error) Option {
+func WithBeforeRequest(f func(req *http.Request) error) Option {
 	return newFuncOption(func(o *options) {
 		o.beforeRequest = append(o.beforeRequest, f)
 	})
@@ -126,7 +126,7 @@ func WithBeforeRequest(f func(req *http.Request, v ...any) error) Option {
 // WithAfterRequest sets a function that will run after every request
 // and has access to the current response to inspect and/or modify it.
 // Can be called multiple times to chain functions.
-func WithAfterRequest(f func(resp *Response, v ...any) error) Option {
+func WithAfterRequest(f func(resp *Response) error) Option {
 	return newFuncOption(func(o *options) {
 		o.afterRequest = append(o.afterRequest, f)
 	})
@@ -140,7 +140,7 @@ func WithFormatErrors(b bool) Option {
 		if b && !o.fmtError {
 			o.fmtError = true
 			// prepend so it runs first
-			var fn []func(resp *Response, v ...any) error
+			var fn []func(resp *Response) error
 			fn = append(fn, fmtError)
 			o.afterRequest = append(fn, o.afterRequest...)
 		}
@@ -154,7 +154,7 @@ func WithDebugRequest(l zerolog.Logger) Option {
 			logger = l
 			o.logRequest = true
 			// prepend so it runs first
-			var fn []func(req *http.Request, v ...any) error
+			var fn []func(req *http.Request) error
 			fn = append(fn, logRequest)
 			o.beforeRequest = append(fn, o.beforeRequest...)
 		}
@@ -168,14 +168,14 @@ func WithDebugResponse(l zerolog.Logger) Option {
 			logger = l
 			o.logResponse = true
 			// prepend so it runs first
-			var fn []func(resp *Response, v ...any) error
+			var fn []func(resp *Response) error
 			fn = append(fn, logResponse)
 			o.afterRequest = append(fn, o.afterRequest...)
 		}
 	})
 }
 
-func fmtError(resp *Response, _ ...any) error {
+func fmtError(resp *Response) error {
 	if resp.StatusCode >= http.StatusBadRequest {
 		// some requests expect a 404
 		if resp.StatusCode == http.StatusNotFound {
@@ -194,7 +194,7 @@ func fmtError(resp *Response, _ ...any) error {
 	return nil
 }
 
-func logRequest(req *http.Request, _ ...any) error {
+func logRequest(req *http.Request) error {
 	var body []byte
 	if req.Body != nil {
 		b, err := io.ReadAll(req.Body)
@@ -215,7 +215,7 @@ func logRequest(req *http.Request, _ ...any) error {
 	return nil
 }
 
-func logResponse(resp *Response, _ ...any) error {
+func logResponse(resp *Response) error {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
