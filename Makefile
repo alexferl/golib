@@ -1,4 +1,4 @@
-.PHONY: dev test cover tidy fmt
+.PHONY: dev test cover tidy update fmt pre-commit
 
 .DEFAULT: help
 help:
@@ -10,6 +10,8 @@ help:
 	@echo "	run go test with -cover"
 	@echo "make tidy"
 	@echo "	run go mod tidy"
+	@echo "make update"
+	@echo "	run go get -u"
 	@echo "make fmt"
 	@echo "	run gofumpt"
 	@echo "make pre-commit"
@@ -45,6 +47,9 @@ cover:
 
 tidy:
 	$(call FOREACH,go mod tidy)
+
+update:
+	$(call FOREACH,go get -u)
 
 fmt: check-gofumpt
 	gofumpt -l -w .
