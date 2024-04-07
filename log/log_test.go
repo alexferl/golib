@@ -13,19 +13,19 @@ func TestNew(t *testing.T) {
 		fail   bool
 	}{
 		{DefaultConfig, false},
-		{&Config{LogLevel: WarnLevel, LogOutput: "stdout", LogWriter: "json"}, false},
-		{&Config{LogLevel: InfoLevel, LogOutput: "stderr", LogWriter: "json"}, false},
-		{&Config{LogLevel: InfoLevel, LogOutput: "stdout", LogWriter: "console"}, false},
-		{&Config{LogLevel: PanicLevel, LogOutput: "stdout", LogWriter: "json"}, false},
-		{&Config{LogLevel: FatalLevel, LogOutput: "stdout", LogWriter: "json"}, false},
-		{&Config{LogLevel: ErrorLevel, LogOutput: "stdout", LogWriter: "json"}, false},
-		{&Config{LogLevel: WarnLevel, LogOutput: "stdout", LogWriter: "json"}, false},
-		{&Config{LogLevel: DebugLevel, LogOutput: "stdout", LogWriter: "json"}, false},
-		{&Config{LogLevel: TraceLevel, LogOutput: "stdout", LogWriter: "json"}, false},
-		{&Config{LogLevel: Disabled, LogOutput: "stdout", LogWriter: "json"}, false},
+		{&Config{LogLevel: WarnLevel, LogOutput: OutputStdOut, LogWriter: WriterJSON}, false},
+		{&Config{LogLevel: InfoLevel, LogOutput: OutputStdErr, LogWriter: WriterJSON}, false},
+		{&Config{LogLevel: InfoLevel, LogOutput: OutputStdOut, LogWriter: WriterConsole}, false},
+		{&Config{LogLevel: PanicLevel, LogOutput: OutputStdOut, LogWriter: WriterJSON}, false},
+		{&Config{LogLevel: FatalLevel, LogOutput: OutputStdOut, LogWriter: WriterJSON}, false},
+		{&Config{LogLevel: ErrorLevel, LogOutput: OutputStdOut, LogWriter: WriterJSON}, false},
+		{&Config{LogLevel: WarnLevel, LogOutput: OutputStdOut, LogWriter: WriterJSON}, false},
+		{&Config{LogLevel: DebugLevel, LogOutput: OutputStdOut, LogWriter: WriterJSON}, false},
+		{&Config{LogLevel: TraceLevel, LogOutput: OutputStdOut, LogWriter: WriterJSON}, false},
+		{&Config{LogLevel: Disabled, LogOutput: OutputStdOut, LogWriter: WriterJSON}, false},
 		{&Config{LogLevel: "wrong"}, true},
 		{&Config{LogLevel: InfoLevel, LogOutput: "wrong"}, true},
-		{&Config{LogLevel: InfoLevel, LogOutput: "stdout", LogWriter: "wrong"}, true},
+		{&Config{LogLevel: InfoLevel, LogOutput: OutputStdOut, LogWriter: "wrong"}, true},
 	}
 
 	for _, tc := range tests {

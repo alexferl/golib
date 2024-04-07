@@ -21,6 +21,22 @@ const (
 	Disabled   = "DISABLED"
 )
 
+var Levels = []string{PanicLevel, FatalLevel, ErrorLevel, WarnLevel, InfoLevel, Disabled, TraceLevel, Disabled}
+
+const (
+	WriterConsole = "console"
+	WriterJSON    = "json"
+)
+
+var Writers = []string{WriterConsole, WriterJSON}
+
+const (
+	OutputStdOut = "stdout"
+	OutputStdErr = "stderr"
+)
+
+var Outputs = []string{OutputStdOut, OutputStdErr}
+
 // New initializes the logger based on the passed Config,
 // defaults to DefaultConfig if `config` is nil.
 func New(config *Config) error {
@@ -46,9 +62,9 @@ func New(config *Config) error {
 
 	var f *os.File
 	switch logOutput {
-	case "stdout":
+	case OutputStdOut:
 		f = os.Stdout
-	case "stderr":
+	case OutputStdErr:
 		f = os.Stderr
 	default:
 		return fmt.Errorf("unknown log-output '%s'", logOutput)
@@ -57,11 +73,11 @@ func New(config *Config) error {
 	logger := zerolog.New(f)
 
 	switch logWriter {
-	case "console":
+	case WriterConsole:
 		logger = log.Output(zerolog.ConsoleWriter{
 			Out: f, TimeFormat: time.RFC3339Nano,
 		})
-	case "json":
+	case WriterJSON:
 		break
 	default:
 		return fmt.Errorf("unknown log-writer '%s'", logWriter)
