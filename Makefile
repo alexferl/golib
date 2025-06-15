@@ -1,58 +1,67 @@
-.PHONY: dev test cover tidy update fmt pre-commit
+.PHONY: dev audit cover fmt lint pre-commit test tidy update-deps
 
 .DEFAULT: help
 help:
 	@echo "make dev"
 	@echo "	setup development environment"
-	@echo "make test"
-	@echo "	run go test"
+	@echo "make audit"
+	@echo "	conduct quality checks"
 	@echo "make cover"
-	@echo "	run go test with -cover"
-	@echo "make tidy"
-	@echo "	run go mod tidy"
-	@echo "make update"
-	@echo "	run go get -u"
+	@echo "	generate coverage report"
 	@echo "make fmt"
-	@echo "	run gofumpt"
+	@echo "	fix code format issues"
+	@echo "make lint"
+	@echo "	run lint checks"
 	@echo "make pre-commit"
 	@echo "	run pre-commit hooks"
+	@echo "make test"
+	@echo "	execute all tests"
+	@echo "make tidy"
+	@echo "	clean and tidy dependencies"
+	@echo "make update-deps"
+	@echo "	update dependencies"
 
 DIRS = $(shell find . -name 'go.mod' -exec dirname {} \;)
 define FOREACH
 	for DIR in $(DIRS); do \
-  		cd $$DIR && $(1) && cd $(CURDIR); \
+  		cd $(CURDIR)/$$DIR && $(1); \
   	done
 endef
 
-check-gofumpt:
-ifeq (, $(shell which gofumpt))
-	$(error "No gofumpt in $(PATH), gofumpt (https://pkg.go.dev/mvdan.cc/gofumpt) is required")
-endif
+GOTESTSUM := go run gotest.tools/gotestsum@latest -f testname -- ./... -race -count=1
+TESTFLAGS := -shuffle=on
+COVERFLAGS := -covermode=atomic
+GOLANGCI_LINT := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
 
 check-pre-commit:
 ifeq (, $(shell which pre-commit))
-	$(error "No pre-commit in $(PATH), pre-commit (https://pre-commit.com) is required")
+	$(error "pre-commit not in $(PATH), pre-commit (https://pre-commit.com) is required")
 endif
 
-checks: check-gofumpt check-pre-commit
-
-dev: checks
+dev: check-pre-commit
 	pre-commit install
 
-test:
-	$(call FOREACH,go test -v ./...)
+audit:
+	$(call FOREACH, go mod verify)
+	$(call FOREACH, go run golang.org/x/vuln/cmd/govulncheck@latest ./...)
 
 cover:
-	$(call FOREACH,go test -cover -v ./...)
+	$(call FOREACH,	$(GOTESTSUM) $(TESTFLAGS) $(COVERFLAGS))
+
+fmt:
+	$(call FOREACH, $(GOLANGCI_LINT) fmt)
+
+lint:
+	$(call FOREACH, $(GOLANGCI_LINT) run)
+
+pre-commit: check-pre-commit
+	pre-commit run --all-files
+
+test:
+	$(call FOREACH,	$(GOTESTSUM) $(TESTFLAGS))
 
 tidy:
 	$(call FOREACH,go mod tidy)
 
-update:
+update-deps: tidy
 	$(call FOREACH,go get -u)
-
-fmt: check-gofumpt
-	gofumpt -l -w .
-
-pre-commit: check-pre-commit
-	pre-commit

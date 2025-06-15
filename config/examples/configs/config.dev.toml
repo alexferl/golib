@@ -1,1 +1,3 @@
-app-name = "myapp"
+app-name = "dev-app"
+port = 3000
+debug = true

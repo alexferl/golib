@@ -1,0 +1,3 @@
+app-name = "staging-app"
+port = 8080
+debug = true

@@ -3,95 +3,213 @@ package config
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
-// Config holds all global configuration for our program.
+const (
+	DefaultAppName = "app"
+	DefaultEnvName = "local"
+	AppName        = "app-name"
+	EnvName        = "env-name"
+)
+
+// Config holds all global configuration for the application.
 type Config struct {
-	AppName      string
-	EnvName      string
-	envVarPrefix string
+	AppName string
+	EnvName string
 }
 
-// New creates a Config instance.
-func New(envVarPrefix string) *Config {
-	return &Config{
-		AppName:      "app",
-		EnvName:      "local",
-		envVarPrefix: envVarPrefix,
+// ConfigLoader manages the configuration loading process.
+type ConfigLoader struct {
+	envVarPrefix string
+	configPaths  []string
+	configType   string
+}
+
+// Option defines a function type for configuring ConfigLoader.
+type Option func(*ConfigLoader)
+
+// LoadOption defines a function type for configuring the load process.
+type LoadOption func(*loadOptions)
+
+// loadOptions holds configuration for the loading process.
+type loadOptions struct {
+	loadConfigFile bool
+	configFileName string
+}
+
+// WithEnvPrefix sets the environment variable prefix.
+func WithEnvPrefix(prefix string) Option {
+	return func(cl *ConfigLoader) {
+		cl.envVarPrefix = prefix
 	}
 }
 
-const (
-	AppName = "app-name"
-	EnvName = "env-name"
-)
-
-// bindFlags adds all the flags from the command line.
-func (c *Config) bindFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&c.AppName, AppName, c.AppName, "The name of the application.")
-	fs.StringVar(&c.EnvName, EnvName, c.EnvName, "The environment of the application. "+
-		"Used to load the right configs file.")
+// WithConfigPaths sets the configuration file search paths.
+func WithConfigPaths(paths ...string) Option {
+	return func(cl *ConfigLoader) {
+		cl.configPaths = paths
+	}
 }
 
-// wordSepNormalizeFunc changes all flags that contain "_" separators.
-func wordSepNormalizeFunc(f *pflag.FlagSet, name string) pflag.NormalizedName {
+// WithConfigType sets the configuration file type.
+func WithConfigType(configType string) Option {
+	return func(cl *ConfigLoader) {
+		cl.configType = configType
+	}
+}
+
+// WithConfigFile enables loading from config file.
+func WithConfigFile(enabled bool) LoadOption {
+	return func(o *loadOptions) {
+		o.loadConfigFile = enabled
+	}
+}
+
+// WithCustomConfigFile enables loading from a custom config file name.
+func WithCustomConfigFile(fileName string) LoadOption {
+	return func(o *loadOptions) {
+		o.loadConfigFile = true
+		o.configFileName = fileName
+	}
+}
+
+// NewConfigLoader creates a new ConfigLoader with the given options.
+func NewConfigLoader(options ...Option) *ConfigLoader {
+	cl := &ConfigLoader{
+		envVarPrefix: "",
+		configPaths:  []string{"./configs", "/configs"},
+		configType:   "toml",
+	}
+
+	for _, option := range options {
+		option(cl)
+	}
+
+	return cl
+}
+
+// AddConfigPath adds a configuration file search path.
+func (cl *ConfigLoader) AddConfigPath(path string) *ConfigLoader {
+	cl.configPaths = append(cl.configPaths, path)
+	return cl
+}
+
+// Validate checks if the configuration values are valid.
+func (c *Config) Validate() error {
+	if strings.TrimSpace(c.AppName) == "" {
+		return errors.New("application name cannot be empty")
+	}
+	if strings.TrimSpace(c.EnvName) == "" {
+		return errors.New("environment name cannot be empty")
+	}
+	return nil
+}
+
+// bindFlags adds all the flags to the provided flag set.
+func (cl *ConfigLoader) bindFlags(fs *pflag.FlagSet, config *Config) {
+	fs.StringVar(&config.AppName, AppName, config.AppName, "The name of the application.")
+	fs.StringVar(&config.EnvName, EnvName, config.EnvName,
+		"The environment of the application. Used to load the right config file.")
+}
+
+// normalizeFlags changes all flags that contain "_" separators to use "-".
+func normalizeFlags(f *pflag.FlagSet, name string) pflag.NormalizedName {
 	if strings.Contains(name, "_") {
-		return pflag.NormalizedName(strings.Replace(name, "_", "-", -1))
+		return pflag.NormalizedName(strings.ReplaceAll(name, "_", "-"))
 	}
 	return pflag.NormalizedName(name)
 }
 
-// BindFlags normalizes and parses the command line flags.
-func (c *Config) BindFlags(flagSets ...func(fs *pflag.FlagSet)) error {
-	for _, flagSet := range flagSets {
-		flagSet(pflag.CommandLine)
+// setupViper configures viper with environment variable settings.
+func (cl *ConfigLoader) setupViper() {
+	if cl.envVarPrefix != "" {
+		viper.SetEnvPrefix(cl.envVarPrefix)
 	}
-
-	c.bindFlags(pflag.CommandLine)
-	err := viper.BindPFlags(pflag.CommandLine)
-	if err != nil {
-		return err
-	}
-
-	pflag.CommandLine.SetNormalizeFunc(wordSepNormalizeFunc)
-	pflag.Parse()
-
-	n := viper.GetString(AppName)
-	if len(n) < 1 {
-		return errors.New("application name cannot be empty")
-	}
-
-	viper.SetEnvPrefix(c.envVarPrefix)
 	replacer := strings.NewReplacer("-", "_")
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
+}
+
+// loadConfigFile loads the configuration file using viper.
+func (cl *ConfigLoader) loadConfigFile(configName string) error {
+	viper.SetConfigName(configName)
+	viper.SetConfigType(cl.configType)
+
+	for _, path := range cl.configPaths {
+		viper.AddConfigPath(path)
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundError) {
+			return fmt.Errorf("config file '%s.%s' not found in paths %v: %w",
+				configName, cl.configType, cl.configPaths, err)
+		}
+		return fmt.Errorf("failed to read config file: %w", err)
+	}
 
 	return nil
 }
 
-// BindFlagsWithConfigPaths normalizes, parses the command line flags and read in config files.
-func (c *Config) BindFlagsWithConfigPaths(flagSets ...func(fs *pflag.FlagSet)) error {
-	err := c.BindFlags(flagSets...)
-	if err != nil {
-		return err
+// LoadConfig loads configuration with the specified options.
+func (cl *ConfigLoader) LoadConfig(options []LoadOption, flagSets ...func(fs *pflag.FlagSet)) (*Config, error) {
+	opts := &loadOptions{
+		loadConfigFile: false,
+		configFileName: "",
 	}
 
-	configName := fmt.Sprintf("config.%s", strings.ToLower(viper.GetString(EnvName)))
-	viper.SetConfigName(configName)
-	viper.SetConfigType("toml")
-	viper.AddConfigPath("./configs")
-	viper.AddConfigPath("/configs")
+	for _, option := range options {
+		option(opts)
+	}
 
-	if err = viper.ReadInConfig(); err != nil {
-		var configFileNotFoundError viper.ConfigFileNotFoundError
-		if errors.As(err, &configFileNotFoundError) {
-			return errors.New(fmt.Sprintf("config file not found: '%v'", err))
+	fs := pflag.NewFlagSet("config", pflag.ExitOnError)
+
+	config := &Config{
+		AppName: DefaultAppName,
+		EnvName: DefaultEnvName,
+	}
+
+	cl.bindFlags(fs, config)
+
+	for _, flagSet := range flagSets {
+		flagSet(fs)
+	}
+
+	fs.SetNormalizeFunc(normalizeFlags)
+
+	if err := fs.Parse(os.Args[1:]); err != nil {
+		return nil, fmt.Errorf("failed to parse flags: %w", err)
+	}
+
+	if err := viper.BindPFlags(fs); err != nil {
+		return nil, fmt.Errorf("failed to bind flags to viper: %w", err)
+	}
+
+	cl.setupViper()
+
+	if opts.loadConfigFile {
+		configName := opts.configFileName
+		if configName == "" {
+			envName := viper.GetString(EnvName)
+			configName = fmt.Sprintf("config.%s", strings.ToLower(envName))
+		}
+
+		if err := cl.loadConfigFile(configName); err != nil {
+			return nil, err
 		}
 	}
 
-	return nil
+	config.AppName = viper.GetString(AppName)
+	config.EnvName = viper.GetString(EnvName)
+
+	if err := config.Validate(); err != nil {
+		return nil, fmt.Errorf("configuration validation failed: %w", err)
+	}
+
+	return config, nil
 }

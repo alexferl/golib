@@ -1,0 +1,3 @@
+app-name = "local-app"
+port = 8080
+debug = true
