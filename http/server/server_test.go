@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -221,5 +222,101 @@ func TestCreateHTTPServer(t *testing.T) {
 		}
 	} else {
 		t.Error("createHTTPServer() returned nil")
+	}
+}
+
+func TestHealthcheckEndpoints(t *testing.T) {
+	config := *DefaultConfig
+	server := New(config)
+
+	req := httptest.NewRequest("GET", config.Healthcheck.LivenessEndpoint, nil)
+	rec := httptest.NewRecorder()
+	c := server.echo.NewContext(req, rec)
+
+	err := config.Healthcheck.LivenessHandler(c)
+	if err != nil {
+		t.Errorf("LivenessHandler returned error: %v", err)
+	}
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200 for liveness, got %d", rec.Code)
+	}
+
+	req = httptest.NewRequest("GET", config.Healthcheck.ReadinessEndpoint, nil)
+	rec = httptest.NewRecorder()
+	c = server.echo.NewContext(req, rec)
+
+	err = config.Healthcheck.ReadinessHandler(c)
+	if err != nil {
+		t.Errorf("ReadinessHandler returned error: %v", err)
+	}
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200 for readiness, got %d", rec.Code)
+	}
+
+	req = httptest.NewRequest("GET", config.Healthcheck.StartupEndpoint, nil)
+	rec = httptest.NewRecorder()
+	c = server.echo.NewContext(req, rec)
+
+	err = config.Healthcheck.StartupHandler(c)
+	if err != nil {
+		t.Errorf("StartupHandler returned error: %v", err)
+	}
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200 for startup, got %d", rec.Code)
+	}
+}
+
+func TestDefaultHealthcheckHandler(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest("GET", "/livez", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	err := defaultHealthcheckHandler(c)
+	if err != nil {
+		t.Errorf("defaultHealthcheckHandler returned error: %v", err)
+	}
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200, got %d", rec.Code)
+	}
+
+	expectedBody := "ok"
+	if strings.TrimSpace(rec.Body.String()) != expectedBody {
+		t.Errorf("Expected body %s, got %s", expectedBody, rec.Body.String())
+	}
+}
+
+func TestHealthcheckEndpointsRegistered(t *testing.T) {
+	config := *DefaultConfig
+	server := New(config)
+
+	e := server.Echo()
+
+	req := httptest.NewRequest("GET", "/livez", nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200 for liveness endpoint, got %d", rec.Code)
+	}
+
+	req = httptest.NewRequest("GET", "/readyz", nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200 for readiness endpoint, got %d", rec.Code)
+	}
+
+	req = httptest.NewRequest("GET", "/startupz", nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200 for startup endpoint, got %d", rec.Code)
 	}
 }

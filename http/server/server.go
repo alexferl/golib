@@ -82,6 +82,10 @@ func New(config Config, options ...Option) *Server {
 
 	server.echo.Logger = lecho.From(server.logger.GetLogger())
 
+	server.echo.GET(config.Healthcheck.LivenessEndpoint, config.Healthcheck.LivenessHandler)
+	server.echo.GET(config.Healthcheck.ReadinessEndpoint, config.Healthcheck.ReadinessHandler)
+	server.echo.GET(config.Healthcheck.StartupEndpoint, config.Healthcheck.StartupHandler)
+
 	return server
 }
 

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/labstack/echo/v4"
 	"github.com/spf13/pflag"
 )
 
@@ -36,6 +37,10 @@ type Config struct {
 	// Redirect holds redirect configuration.
 	// Optional. Default value with HTTPS redirect disabled.
 	Redirect RedirectConfig
+
+	// Healthcheck holds healthcheck configuration.
+	// Optional. Default value with standard endpoints enabled.
+	Healthcheck HealthcheckConfig
 }
 
 // HTTPConfig holds HTTP server configuration.
@@ -137,6 +142,37 @@ type RedirectConfig struct {
 	Code int
 }
 
+// HealthcheckConfig holds healthcheck endpoint configuration.
+type HealthcheckConfig struct {
+	// LivenessEndpoint specifies the liveness check endpoint.
+	// Optional. Default value "/livez".
+	LivenessEndpoint string
+
+	// LivenessHandler specifies the liveness check handler.
+	// Optional. Default value returns 200 OK.
+	LivenessHandler echo.HandlerFunc
+
+	// ReadinessEndpoint specifies the readiness check endpoint.
+	// Optional. Default value "/readyz".
+	ReadinessEndpoint string
+
+	// ReadinessHandler specifies the readiness check handler.
+	// Optional. Default value returns 200 OK.
+	ReadinessHandler echo.HandlerFunc
+
+	// StartupEndpoint specifies the startup check endpoint.
+	// Optional. Default value "/startupz".
+	StartupEndpoint string
+
+	// StartupHandler specifies the startup check handler.
+	// Optional. Default value returns 200 OK.
+	StartupHandler echo.HandlerFunc
+}
+
+func defaultHealthcheckHandler(c echo.Context) error {
+	return c.String(http.StatusOK, "ok")
+}
+
 // DefaultConfig provides default server configuration.
 var DefaultConfig = &Config{
 	Name:            "app",
@@ -172,32 +208,43 @@ var DefaultConfig = &Config{
 		HTTPS: false,
 		Code:  http.StatusMovedPermanently,
 	},
+	Healthcheck: HealthcheckConfig{
+		LivenessEndpoint:  "/livez",
+		LivenessHandler:   defaultHealthcheckHandler,
+		ReadinessEndpoint: "/readyz",
+		ReadinessHandler:  defaultHealthcheckHandler,
+		StartupEndpoint:   "/startupz",
+		StartupHandler:    defaultHealthcheckHandler,
+	},
 }
 
 const (
-	ServerName                  = "server-name"
-	ServerVersion               = "server-version"
-	ServerGracefulTimeout       = "server-graceful-timeout"
-	ServerHTTPBindAddr          = "server-http-bind-addr"
-	ServerHTTPIdleTimeout       = "server-http-idle-timeout"
-	ServerHTTPReadTimeout       = "server-http-read-timeout"
-	ServerHTTPReadHeaderTimeout = "server-http-read-header-timeout"
-	ServerHTTPWriteTimeout      = "server-http-write-timeout"
-	ServerHTTPMaxHeaderBytes    = "server-http-max-header-bytes"
-	ServerTLSEnabled            = "server-tls-enabled"
-	ServerTLSBindAddr           = "server-tls-bind-addr"
-	ServerTLSCertFile           = "server-tls-cert-file"
-	ServerTLSKeyFile            = "server-tls-key-file"
-	ServerTLSACMEEnabled        = "server-tls-acme-enabled"
-	ServerTLSACMEEmail          = "server-tls-acme-email"
-	ServerTLSACMEHostWhitelist  = "server-tls-acme-host-whitelist"
-	ServerTLSACMECachePath      = "server-tls-acme-cache-path"
-	ServerTLSACMEDirectoryURL   = "server-tls-acme-directory-url"
-	ServerCompressEnabled       = "server-compress-enabled"
-	ServerCompressLevel         = "server-compress-level"
-	ServerCompressMinLength     = "server-compress-min-length"
-	ServerRedirectHTTPS         = "server-redirect-https"
-	ServerRedirectCode          = "server-redirect-code"
+	ServerName                         = "server-name"
+	ServerVersion                      = "server-version"
+	ServerGracefulTimeout              = "server-graceful-timeout"
+	ServerHTTPBindAddr                 = "server-http-bind-addr"
+	ServerHTTPIdleTimeout              = "server-http-idle-timeout"
+	ServerHTTPReadTimeout              = "server-http-read-timeout"
+	ServerHTTPReadHeaderTimeout        = "server-http-read-header-timeout"
+	ServerHTTPWriteTimeout             = "server-http-write-timeout"
+	ServerHTTPMaxHeaderBytes           = "server-http-max-header-bytes"
+	ServerTLSEnabled                   = "server-tls-enabled"
+	ServerTLSBindAddr                  = "server-tls-bind-addr"
+	ServerTLSCertFile                  = "server-tls-cert-file"
+	ServerTLSKeyFile                   = "server-tls-key-file"
+	ServerTLSACMEEnabled               = "server-tls-acme-enabled"
+	ServerTLSACMEEmail                 = "server-tls-acme-email"
+	ServerTLSACMEHostWhitelist         = "server-tls-acme-host-whitelist"
+	ServerTLSACMECachePath             = "server-tls-acme-cache-path"
+	ServerTLSACMEDirectoryURL          = "server-tls-acme-directory-url"
+	ServerCompressEnabled              = "server-compress-enabled"
+	ServerCompressLevel                = "server-compress-level"
+	ServerCompressMinLength            = "server-compress-min-length"
+	ServerRedirectHTTPS                = "server-redirect-https"
+	ServerRedirectCode                 = "server-redirect-code"
+	ServerHealthcheckLivenessEndpoint  = "server-healthcheck-liveness-endpoint"
+	ServerHealthcheckReadinessEndpoint = "server-healthcheck-readiness-endpoint"
+	ServerHealthcheckStartupEndpoint   = "server-healthcheck-startup-endpoint"
 )
 
 // FlagSet returns a pflag.FlagSet for CLI configuration.
@@ -237,6 +284,11 @@ func (c *Config) FlagSet() *pflag.FlagSet {
 	// Redirect config
 	fs.BoolVar(&c.Redirect.HTTPS, ServerRedirectHTTPS, c.Redirect.HTTPS, "Redirect HTTP to HTTPS")
 	fs.IntVar(&c.Redirect.Code, ServerRedirectCode, c.Redirect.Code, "Redirect status code")
+
+	// Healthcheck config
+	fs.StringVar(&c.Healthcheck.LivenessEndpoint, ServerHealthcheckLivenessEndpoint, c.Healthcheck.LivenessEndpoint, "Liveness check endpoint")
+	fs.StringVar(&c.Healthcheck.ReadinessEndpoint, ServerHealthcheckReadinessEndpoint, c.Healthcheck.ReadinessEndpoint, "Readiness check endpoint")
+	fs.StringVar(&c.Healthcheck.StartupEndpoint, ServerHealthcheckStartupEndpoint, c.Healthcheck.StartupEndpoint, "Startup check endpoint")
 
 	return fs
 }

@@ -41,6 +41,11 @@ func TestConfig_FlagSet(t *testing.T) {
 			HTTPS: true,
 			Code:  302,
 		},
+		Healthcheck: HealthcheckConfig{
+			LivenessEndpoint:  "/health/live",
+			ReadinessEndpoint: "/health/ready",
+			StartupEndpoint:   "/health/startup",
+		},
 	}
 
 	fs := config.FlagSet()
@@ -106,6 +111,34 @@ func TestConfig_FlagSet(t *testing.T) {
 			t.Errorf("Flag %s default value = %v, want test@example.com", ServerTLSACMEEmail, acmeEmailFlag.DefValue)
 		}
 	}
+
+	// Test Healthcheck flags
+	livenessFlag := fs.Lookup(ServerHealthcheckLivenessEndpoint)
+	if livenessFlag == nil {
+		t.Errorf("Flag %s not found", ServerHealthcheckLivenessEndpoint)
+	} else {
+		if livenessFlag.DefValue != "/health/live" {
+			t.Errorf("Flag %s default value = %v, want /health/live", ServerHealthcheckLivenessEndpoint, livenessFlag.DefValue)
+		}
+	}
+
+	readinessFlag := fs.Lookup(ServerHealthcheckReadinessEndpoint)
+	if readinessFlag == nil {
+		t.Errorf("Flag %s not found", ServerHealthcheckReadinessEndpoint)
+	} else {
+		if readinessFlag.DefValue != "/health/ready" {
+			t.Errorf("Flag %s default value = %v, want /health/ready", ServerHealthcheckReadinessEndpoint, readinessFlag.DefValue)
+		}
+	}
+
+	startupFlag := fs.Lookup(ServerHealthcheckStartupEndpoint)
+	if startupFlag == nil {
+		t.Errorf("Flag %s not found", ServerHealthcheckStartupEndpoint)
+	} else {
+		if startupFlag.DefValue != "/health/startup" {
+			t.Errorf("Flag %s default value = %v, want /health/startup", ServerHealthcheckStartupEndpoint, startupFlag.DefValue)
+		}
+	}
 }
 
 func TestConfig_FlagSet_Parse(t *testing.T) {
@@ -133,6 +166,11 @@ func TestConfig_FlagSet_Parse(t *testing.T) {
 		Redirect: RedirectConfig{
 			HTTPS: false,
 			Code:  301,
+		},
+		Healthcheck: HealthcheckConfig{
+			LivenessEndpoint:  "/livez",
+			ReadinessEndpoint: "/readyz",
+			StartupEndpoint:   "/startupz",
 		},
 	}
 
@@ -162,6 +200,9 @@ func TestConfig_FlagSet_Parse(t *testing.T) {
 		"--server-compress-min-length", "512",
 		"--server-redirect-https",
 		"--server-redirect-code", "308",
+		"--server-healthcheck-liveness-endpoint", "/custom/live",
+		"--server-healthcheck-readiness-endpoint", "/custom/ready",
+		"--server-healthcheck-startup-endpoint", "/custom/startup",
 	}
 
 	err := fs.Parse(args)
@@ -225,6 +266,17 @@ func TestConfig_FlagSet_Parse(t *testing.T) {
 	if config.Redirect.Code != 308 {
 		t.Errorf("Redirect.Code = %v, want 308", config.Redirect.Code)
 	}
+
+	// Verify healthcheck config
+	if config.Healthcheck.LivenessEndpoint != "/custom/live" {
+		t.Errorf("Healthcheck.LivenessEndpoint = %v, want /custom/live", config.Healthcheck.LivenessEndpoint)
+	}
+	if config.Healthcheck.ReadinessEndpoint != "/custom/ready" {
+		t.Errorf("Healthcheck.ReadinessEndpoint = %v, want /custom/ready", config.Healthcheck.ReadinessEndpoint)
+	}
+	if config.Healthcheck.StartupEndpoint != "/custom/startup" {
+		t.Errorf("Healthcheck.StartupEndpoint = %v, want /custom/startup", config.Healthcheck.StartupEndpoint)
+	}
 }
 
 func TestDefaultConfig(t *testing.T) {
@@ -273,6 +325,26 @@ func TestDefaultConfig(t *testing.T) {
 	if DefaultConfig.Redirect.Code != http.StatusMovedPermanently {
 		t.Errorf("DefaultConfig.Redirect.Code = %v, want %v", DefaultConfig.Redirect.Code, http.StatusMovedPermanently)
 	}
+
+	// Test healthcheck defaults
+	if DefaultConfig.Healthcheck.LivenessEndpoint != "/livez" {
+		t.Errorf("DefaultConfig.Healthcheck.LivenessEndpoint = %v, want /livez", DefaultConfig.Healthcheck.LivenessEndpoint)
+	}
+	if DefaultConfig.Healthcheck.ReadinessEndpoint != "/readyz" {
+		t.Errorf("DefaultConfig.Healthcheck.ReadinessEndpoint = %v, want /readyz", DefaultConfig.Healthcheck.ReadinessEndpoint)
+	}
+	if DefaultConfig.Healthcheck.StartupEndpoint != "/startupz" {
+		t.Errorf("DefaultConfig.Healthcheck.StartupEndpoint = %v, want /startupz", DefaultConfig.Healthcheck.StartupEndpoint)
+	}
+	if DefaultConfig.Healthcheck.LivenessHandler == nil {
+		t.Error("DefaultConfig.Healthcheck.LivenessHandler is nil")
+	}
+	if DefaultConfig.Healthcheck.ReadinessHandler == nil {
+		t.Error("DefaultConfig.Healthcheck.ReadinessHandler is nil")
+	}
+	if DefaultConfig.Healthcheck.StartupHandler == nil {
+		t.Error("DefaultConfig.Healthcheck.StartupHandler is nil")
+	}
 }
 
 func TestConfig_FlagSet_DefaultValues(t *testing.T) {
@@ -288,6 +360,11 @@ func TestConfig_FlagSet_DefaultValues(t *testing.T) {
 		TLS: TLSConfig{
 			Enabled:  true,
 			BindAddr: ":9443",
+		},
+		Healthcheck: HealthcheckConfig{
+			LivenessEndpoint:  "/custom/live",
+			ReadinessEndpoint: "/custom/ready",
+			StartupEndpoint:   "/custom/startup",
 		},
 	}
 
@@ -324,6 +401,14 @@ func TestConfig_FlagSet_DefaultValues(t *testing.T) {
 	if tlsEnabledFlag.DefValue != "true" {
 		t.Errorf("TLS Enabled flag default = %v, want true", tlsEnabledFlag.DefValue)
 	}
+
+	livenessFlag := fs.Lookup(ServerHealthcheckLivenessEndpoint)
+	if livenessFlag == nil {
+		t.Fatal("Healthcheck Liveness flag not found")
+	}
+	if livenessFlag.DefValue != "/custom/live" {
+		t.Errorf("Healthcheck Liveness flag default = %v, want /custom/live", livenessFlag.DefValue)
+	}
 }
 
 func TestConfig_FlagSet_EmptyParse(t *testing.T) {
@@ -344,5 +429,8 @@ func TestConfig_FlagSet_EmptyParse(t *testing.T) {
 	}
 	if config.TLS.Enabled != false {
 		t.Errorf("TLS.Enabled = %v, want false (default)", config.TLS.Enabled)
+	}
+	if config.Healthcheck.LivenessEndpoint != "/livez" {
+		t.Errorf("Healthcheck.LivenessEndpoint = %v, want /livez (default)", config.Healthcheck.LivenessEndpoint)
 	}
 }
