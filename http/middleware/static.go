@@ -55,12 +55,14 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (s *Static) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Static", pflag.ExitOnError)
+
 	fs.BoolVar(&s.Enabled, StaticEnabled, s.Enabled, "Enable static file serving middleware")
 	fs.StringVar(&s.Root, StaticRoot, s.Root, "Root directory for static files")
 	fs.StringVar(&s.Index, StaticIndex, s.Index, "Index file name")
 	fs.BoolVar(&s.HTML5, StaticHTML5, s.HTML5, "Enable HTML5 mode")
 	fs.BoolVar(&s.Browse, StaticBrowse, s.Browse, "Enable directory browsing")
 	fs.BoolVar(&s.IgnoreBase, StaticIgnoreBase, s.IgnoreBase, "Ignore base path")
+
 	return fs
 }
 

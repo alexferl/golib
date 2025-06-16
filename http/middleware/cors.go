@@ -59,6 +59,7 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (c *CORS) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("CORS", pflag.ExitOnError)
+
 	fs.BoolVar(&c.Enabled, CORSEnabled, c.Enabled, "Enable CORS middleware")
 	fs.StringSliceVar(&c.AllowOrigins, CORSAllowOrigins, c.AllowOrigins, "Allowed origins for CORS requests")
 	fs.StringSliceVar(&c.AllowMethods, CORSAllowMethods, c.AllowMethods, "Allowed HTTP methods for CORS requests")
@@ -66,6 +67,7 @@ func (c *CORS) FlagSet() *pflag.FlagSet {
 	fs.BoolVar(&c.AllowCredentials, CORSAllowCredentials, c.AllowCredentials, "Allow credentials in CORS requests")
 	fs.StringSliceVar(&c.ExposeHeaders, CORSExposeHeaders, c.ExposeHeaders, "Headers exposed to the client")
 	fs.IntVar(&c.MaxAge, CORSMaxAge, c.MaxAge, "Maximum age for preflight requests in seconds")
+
 	return fs
 }
 

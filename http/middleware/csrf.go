@@ -148,6 +148,7 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (c *CSRF) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("CSRF", pflag.ExitOnError)
+
 	fs.BoolVar(&c.Enabled, CSRFEnabled, c.Enabled, "Enable CSRF protection middleware")
 	fs.Uint8Var(&c.TokenLength, CSRFTokenLength, c.TokenLength, "Length of the CSRF token")
 	fs.StringVar(&c.TokenLookup, CSRFTokenLookup, c.TokenLookup, "Where to look for the CSRF token")
@@ -159,6 +160,7 @@ func (c *CSRF) FlagSet() *pflag.FlagSet {
 	fs.BoolVar(&c.CookieSecure, CSRFCookieSecure, c.CookieSecure, "Whether the CSRF cookie should be secure")
 	fs.BoolVar(&c.CookieHTTPOnly, CSRFCookieHTTPOnly, c.CookieHTTPOnly, "Whether the CSRF cookie should be HTTP only")
 	fs.Var(&c.CookieSameSite, CSRFCookieSameSite, fmt.Sprintf("SameSite attribute for CSRF cookie\nValues: %s", strings.Join(CSRFSameSiteModes, ", ")))
+
 	return fs
 }
 

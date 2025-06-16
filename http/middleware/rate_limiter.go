@@ -98,11 +98,13 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (r *RateLimiter) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Rate Limiter", pflag.ExitOnError)
+
 	fs.BoolVar(&r.Enabled, RateLimiterEnabled, r.Enabled, "Enable rate limiting middleware")
 	fs.Var(&r.Store, RateLimiterStoreType, fmt.Sprintf("Rate limiter store type\nValues: %s", strings.Join(LimiterStores, ", ")))
 	fs.Float64Var(&r.Memory.Rate, RateLimiterMemoryRate, r.Memory.Rate, "Rate limit per second for memory store")
 	fs.IntVar(&r.Memory.Burst, RateLimiterMemoryBurst, r.Memory.Burst, "Burst limit for memory store")
 	fs.DurationVar(&r.Memory.ExpiresIn, RateLimiterMemoryExpires, r.Memory.ExpiresIn, "Expiration time for rate limit entries")
+
 	return fs
 }
 

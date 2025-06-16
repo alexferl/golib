@@ -51,11 +51,13 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (r *Recover) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Recover", pflag.ExitOnError)
+
 	fs.BoolVar(&r.Enabled, RecoverEnabled, r.Enabled, "Enable panic recovery middleware")
 	fs.IntVar(&r.StackSize, RecoverStackSize, r.StackSize, "Stack size for recovery in bytes")
 	fs.BoolVar(&r.DisableStackAll, RecoverDisableStackAll, r.DisableStackAll, "Disable stack trace for all errors")
 	fs.BoolVar(&r.DisablePrintStack, RecoverDisablePrintStack, r.DisablePrintStack, "Disable printing stack trace")
 	fs.BoolVar(&r.DisableErrorHandler, RecoverDisableErrorHandler, r.DisableErrorHandler, "Disable custom error handler")
+
 	return fs
 }
 

@@ -31,8 +31,10 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (b *BodyLimit) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Body Limit", pflag.ExitOnError)
+
 	fs.BoolVar(&b.Enabled, BodyLimitEnabled, b.Enabled, "Enable request body size limiting")
 	fs.StringVar(&b.MaxSize, BodyLimitMaxSize, b.MaxSize, "Maximum request body size (e.g., 1MB, 2KB)")
+
 	return fs
 }
 

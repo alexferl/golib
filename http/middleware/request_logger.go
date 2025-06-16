@@ -34,7 +34,9 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (l *RequestLogger) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Request Logger", pflag.ExitOnError)
+
 	fs.BoolVar(&l.Enabled, RequestLoggerEnabled, l.Enabled, "Enable request logging middleware")
+
 	return fs
 }
 

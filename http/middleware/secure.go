@@ -112,6 +112,7 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (s *Secure) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Secure", pflag.ExitOnError)
+
 	fs.BoolVar(&s.Enabled, SecureEnabled, s.Enabled, "Enable security middleware")
 	fs.StringVar(&s.ContentSecurityPolicy, SecureContentSecurityPolicy, s.ContentSecurityPolicy, "Content Security Policy header value")
 	fs.BoolVar(&s.ContentSecurityPolicyReportOnly, SecureContentSecurityPolicyReportOnly, s.ContentSecurityPolicyReportOnly, "Enable CSP report-only mode")
@@ -126,6 +127,7 @@ func (s *Secure) FlagSet() *pflag.FlagSet {
 	fs.BoolVar(&s.StrictTransportSecurity.PreloadEnabled, SecureSTSPreloadEnabled, s.StrictTransportSecurity.PreloadEnabled, "Enable HSTS preload")
 	fs.StringVar(&s.XContentTypeOptions, SecureXContentTypeOptions, s.XContentTypeOptions, "X-Content-Type-Options header value")
 	fs.StringVar(&s.XFrameOptions, SecureXFrameOptions, s.XFrameOptions, "X-Frame-Options header value")
+
 	return fs
 }
 

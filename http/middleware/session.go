@@ -85,9 +85,11 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (s *Session) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Session", pflag.ExitOnError)
+
 	fs.BoolVar(&s.Enabled, SessionEnabled, s.Enabled, "Enable session middleware")
 	fs.Var(&s.Store, SessionStoreType, fmt.Sprintf("Session store type\nValues: %s", strings.Join(SessionStores, ", ")))
 	fs.StringVar(&s.Cookie.Secret, SessionCookieSecret, s.Cookie.Secret, "Secret key for cookie sessions")
+
 	return fs
 }
 

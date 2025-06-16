@@ -39,9 +39,11 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (t *Timeout) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Timeout", pflag.ExitOnError)
+
 	fs.BoolVar(&t.Enabled, TimeoutEnabled, t.Enabled, "Enable request timeout middleware")
 	fs.StringVar(&t.ErrorMessage, TimeoutErrorMessage, t.ErrorMessage, "Error message for timeout responses")
 	fs.DurationVar(&t.Duration, TimeoutDuration, t.Duration, "Request timeout duration")
+
 	return fs
 }
 

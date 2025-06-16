@@ -31,8 +31,10 @@ const (
 // FlagSet returns a pflag.FlagSet for CLI configuration.
 func (r *RequestID) FlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("Request ID", pflag.ExitOnError)
+
 	fs.BoolVar(&r.Enabled, RequestIDEnabled, r.Enabled, "Enable request ID middleware")
 	fs.StringVar(&r.TargetHeader, RequestIDTargetHeader, r.TargetHeader, "Header name for the request ID")
+
 	return fs
 }
 
