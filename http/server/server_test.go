@@ -10,6 +10,7 @@ import (
 
 	"github.com/alexferl/golib/logger"
 	"github.com/labstack/echo/v4"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func TestNew(t *testing.T) {
@@ -318,5 +319,95 @@ func TestHealthcheckEndpointsRegistered(t *testing.T) {
 
 	if rec.Code != 200 {
 		t.Errorf("Expected status 200 for startup endpoint, got %d", rec.Code)
+	}
+}
+
+func resetPrometheusRegistry() {
+	prometheus.DefaultRegisterer = prometheus.NewRegistry()
+	prometheus.DefaultGatherer = prometheus.DefaultRegisterer.(prometheus.Gatherer)
+}
+
+func TestPrometheusEndpoint(t *testing.T) {
+	resetPrometheusRegistry()
+	defer resetPrometheusRegistry()
+
+	config := Config{
+		Name: "testapp",
+		Prometheus: PrometheusConfig{
+			Enabled: true,
+			Path:    "/metrics",
+		},
+	}
+
+	server := New(config)
+	e := server.Echo()
+
+	req := httptest.NewRequest("GET", "/metrics", nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200 for Prometheus endpoint, got %d", rec.Code)
+	}
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "# HELP") || !strings.Contains(body, "# TYPE") {
+		t.Error("Response does not contain Prometheus metrics format")
+	}
+}
+
+func TestPrometheusDisabled(t *testing.T) {
+	resetPrometheusRegistry()
+	defer resetPrometheusRegistry()
+
+	config := Config{
+		Name: "testapp",
+		Prometheus: PrometheusConfig{
+			Enabled: false,
+			Path:    "/metrics",
+		},
+	}
+
+	server := New(config)
+	e := server.Echo()
+
+	req := httptest.NewRequest("GET", "/metrics", nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != 404 {
+		t.Errorf("Expected status 404 for disabled Prometheus endpoint, got %d", rec.Code)
+	}
+}
+
+func TestPrometheusCustomPath(t *testing.T) {
+	resetPrometheusRegistry()
+	defer resetPrometheusRegistry()
+
+	config := Config{
+		Name: "testapp",
+		Prometheus: PrometheusConfig{
+			Enabled: true,
+			Path:    "/custom/metrics",
+		},
+	}
+
+	server := New(config)
+	e := server.Echo()
+
+	req := httptest.NewRequest("GET", "/custom/metrics", nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != 200 {
+		t.Errorf("Expected status 200 for custom Prometheus endpoint, got %d", rec.Code)
+	}
+
+	req = httptest.NewRequest("GET", "/metrics", nil)
+	rec = httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != 404 {
+		t.Errorf("Expected status 404 for default metrics path when custom path is used, got %d", rec.Code)
 	}
 }

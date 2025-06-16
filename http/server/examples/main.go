@@ -44,12 +44,12 @@ func main() {
 		},
 	)
 	if err != nil {
-		log.Fatal("Failed to load config:", err)
+		log.Fatal("failed to load config:", err)
 	}
 
 	appLogger, err := logger.New(appConfig.Logger)
 	if err != nil {
-		log.Fatal("Failed to create logger:", err)
+		log.Fatal("failed to create logger:", err)
 	}
 
 	appConfig.RequestLogger.Logger = appLogger
@@ -80,24 +80,24 @@ func main() {
 		Str("version", appConfig.Server.Version).
 		Str("addr", appConfig.Server.HTTP.BindAddr).
 		Bool("tls", appConfig.Server.TLS.Enabled).
-		Msg("Server started")
+		Msg("server started")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	select {
 	case err := <-errCh:
-		srv.Logger().Fatal().Err(err).Msg("Server error")
+		srv.Logger().Fatal().Err(err).Msg("server error")
 	case <-quit:
-		srv.Logger().Info().Msg("Received shutdown signal")
+		srv.Logger().Info().Msg("received shutdown signal")
 
 		ctx, cancel := context.WithTimeout(context.Background(), appConfig.Server.GracefulTimeout)
 		defer cancel()
 
 		if err := srv.Shutdown(ctx); err != nil {
-			srv.Logger().Fatal().Err(err).Msg("Server forced to shutdown")
+			srv.Logger().Fatal().Err(err).Msg("server forced to shutdown")
 		}
 
-		srv.Logger().Info().Msg("Server exited")
+		srv.Logger().Info().Msg("server exited")
 	}
 }

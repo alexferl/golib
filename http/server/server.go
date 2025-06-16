@@ -10,6 +10,7 @@ import (
 
 	"github.com/alexferl/golib/logger"
 	"github.com/klauspost/compress/gzhttp"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/ziflex/lecho/v3"
 	"golang.org/x/crypto/acme"
@@ -85,6 +86,14 @@ func New(config Config, options ...Option) *Server {
 	server.echo.GET(config.Healthcheck.LivenessEndpoint, config.Healthcheck.LivenessHandler)
 	server.echo.GET(config.Healthcheck.ReadinessEndpoint, config.Healthcheck.ReadinessHandler)
 	server.echo.GET(config.Healthcheck.StartupEndpoint, config.Healthcheck.StartupHandler)
+
+	if config.Prometheus.Enabled {
+		server.echo.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
+			Namespace: "",
+			Subsystem: config.Name,
+		}))
+		server.echo.GET(config.Prometheus.Path, echoprometheus.NewHandler())
+	}
 
 	return server
 }

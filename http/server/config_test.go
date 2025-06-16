@@ -46,6 +46,10 @@ func TestConfig_FlagSet(t *testing.T) {
 			ReadinessEndpoint: "/health/ready",
 			StartupEndpoint:   "/health/startup",
 		},
+		Prometheus: PrometheusConfig{
+			Enabled: true,
+			Path:    "/custom/metrics",
+		},
 	}
 
 	fs := config.FlagSet()
@@ -139,6 +143,25 @@ func TestConfig_FlagSet(t *testing.T) {
 			t.Errorf("Flag %s default value = %v, want /health/startup", ServerHealthcheckStartupEndpoint, startupFlag.DefValue)
 		}
 	}
+
+	// Test Prometheus flags
+	prometheusEnabledFlag := fs.Lookup(ServerPrometheusEnabled)
+	if prometheusEnabledFlag == nil {
+		t.Errorf("Flag %s not found", ServerPrometheusEnabled)
+	} else {
+		if prometheusEnabledFlag.DefValue != "true" {
+			t.Errorf("Flag %s default value = %v, want true", ServerPrometheusEnabled, prometheusEnabledFlag.DefValue)
+		}
+	}
+
+	prometheusPathFlag := fs.Lookup(ServerPrometheusPath)
+	if prometheusPathFlag == nil {
+		t.Errorf("Flag %s not found", ServerPrometheusPath)
+	} else {
+		if prometheusPathFlag.DefValue != "/custom/metrics" {
+			t.Errorf("Flag %s default value = %v, want /custom/metrics", ServerPrometheusPath, prometheusPathFlag.DefValue)
+		}
+	}
 }
 
 func TestConfig_FlagSet_Parse(t *testing.T) {
@@ -172,6 +195,10 @@ func TestConfig_FlagSet_Parse(t *testing.T) {
 			ReadinessEndpoint: "/readyz",
 			StartupEndpoint:   "/startupz",
 		},
+		Prometheus: PrometheusConfig{
+			Enabled: false,
+			Path:    "/metrics",
+		},
 	}
 
 	fs := config.FlagSet()
@@ -203,6 +230,8 @@ func TestConfig_FlagSet_Parse(t *testing.T) {
 		"--server-healthcheck-liveness-endpoint", "/custom/live",
 		"--server-healthcheck-readiness-endpoint", "/custom/ready",
 		"--server-healthcheck-startup-endpoint", "/custom/startup",
+		"--server-prometheus-enabled",
+		"--server-prometheus-path", "/custom/metrics",
 	}
 
 	err := fs.Parse(args)
@@ -277,6 +306,14 @@ func TestConfig_FlagSet_Parse(t *testing.T) {
 	if config.Healthcheck.StartupEndpoint != "/custom/startup" {
 		t.Errorf("Healthcheck.StartupEndpoint = %v, want /custom/startup", config.Healthcheck.StartupEndpoint)
 	}
+
+	// Verify prometheus config
+	if !config.Prometheus.Enabled {
+		t.Errorf("Prometheus.Enabled = %v, want true", config.Prometheus.Enabled)
+	}
+	if config.Prometheus.Path != "/custom/metrics" {
+		t.Errorf("Prometheus.Path = %v, want /custom/metrics", config.Prometheus.Path)
+	}
 }
 
 func TestDefaultConfig(t *testing.T) {
@@ -345,6 +382,14 @@ func TestDefaultConfig(t *testing.T) {
 	if DefaultConfig.Healthcheck.StartupHandler == nil {
 		t.Error("DefaultConfig.Healthcheck.StartupHandler is nil")
 	}
+
+	// Test prometheus defaults
+	if DefaultConfig.Prometheus.Enabled != false {
+		t.Errorf("DefaultConfig.Prometheus.Enabled = %v, want false", DefaultConfig.Prometheus.Enabled)
+	}
+	if DefaultConfig.Prometheus.Path != "/metrics" {
+		t.Errorf("DefaultConfig.Prometheus.Path = %v, want /metrics", DefaultConfig.Prometheus.Path)
+	}
 }
 
 func TestConfig_FlagSet_DefaultValues(t *testing.T) {
@@ -365,6 +410,10 @@ func TestConfig_FlagSet_DefaultValues(t *testing.T) {
 			LivenessEndpoint:  "/custom/live",
 			ReadinessEndpoint: "/custom/ready",
 			StartupEndpoint:   "/custom/startup",
+		},
+		Prometheus: PrometheusConfig{
+			Enabled: true,
+			Path:    "/custom/prometheus",
 		},
 	}
 
@@ -409,6 +458,22 @@ func TestConfig_FlagSet_DefaultValues(t *testing.T) {
 	if livenessFlag.DefValue != "/custom/live" {
 		t.Errorf("Healthcheck Liveness flag default = %v, want /custom/live", livenessFlag.DefValue)
 	}
+
+	prometheusEnabledFlag := fs.Lookup(ServerPrometheusEnabled)
+	if prometheusEnabledFlag == nil {
+		t.Fatal("Prometheus Enabled flag not found")
+	}
+	if prometheusEnabledFlag.DefValue != "true" {
+		t.Errorf("Prometheus Enabled flag default = %v, want true", prometheusEnabledFlag.DefValue)
+	}
+
+	prometheusPathFlag := fs.Lookup(ServerPrometheusPath)
+	if prometheusPathFlag == nil {
+		t.Fatal("Prometheus Path flag not found")
+	}
+	if prometheusPathFlag.DefValue != "/custom/prometheus" {
+		t.Errorf("Prometheus Path flag default = %v, want /custom/prometheus", prometheusPathFlag.DefValue)
+	}
 }
 
 func TestConfig_FlagSet_EmptyParse(t *testing.T) {
@@ -432,5 +497,11 @@ func TestConfig_FlagSet_EmptyParse(t *testing.T) {
 	}
 	if config.Healthcheck.LivenessEndpoint != "/livez" {
 		t.Errorf("Healthcheck.LivenessEndpoint = %v, want /livez (default)", config.Healthcheck.LivenessEndpoint)
+	}
+	if config.Prometheus.Enabled != false {
+		t.Errorf("Prometheus.Enabled = %v, want false (default)", config.Prometheus.Enabled)
+	}
+	if config.Prometheus.Path != "/metrics" {
+		t.Errorf("Prometheus.Path = %v, want /metrics (default)", config.Prometheus.Path)
 	}
 }

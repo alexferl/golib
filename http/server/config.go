@@ -41,6 +41,10 @@ type Config struct {
 	// Healthcheck holds healthcheck configuration.
 	// Optional. Default value with standard endpoints enabled.
 	Healthcheck HealthcheckConfig
+
+	// Prometheus holds Prometheus metrics configuration.
+	// Optional. Default value with metrics disabled.
+	Prometheus PrometheusConfig
 }
 
 // HTTPConfig holds HTTP server configuration.
@@ -173,6 +177,17 @@ func defaultHealthcheckHandler(c echo.Context) error {
 	return c.String(http.StatusOK, "ok")
 }
 
+// PrometheusConfig holds Prometheus metrics configuration.
+type PrometheusConfig struct {
+	// Enabled indicates whether Prometheus metrics are enabled.
+	// Optional. Default value false.
+	Enabled bool
+
+	// Path specifies the HTTP path for Prometheus metrics.
+	// Optional. Default value "/metrics".
+	Path string
+}
+
 // DefaultConfig provides default server configuration.
 var DefaultConfig = &Config{
 	Name:            "app",
@@ -216,6 +231,10 @@ var DefaultConfig = &Config{
 		StartupEndpoint:   "/startupz",
 		StartupHandler:    defaultHealthcheckHandler,
 	},
+	Prometheus: PrometheusConfig{
+		Enabled: false,
+		Path:    "/metrics",
+	},
 }
 
 const (
@@ -245,6 +264,8 @@ const (
 	ServerHealthcheckLivenessEndpoint  = "server-healthcheck-liveness-endpoint"
 	ServerHealthcheckReadinessEndpoint = "server-healthcheck-readiness-endpoint"
 	ServerHealthcheckStartupEndpoint   = "server-healthcheck-startup-endpoint"
+	ServerPrometheusEnabled            = "server-prometheus-enabled"
+	ServerPrometheusPath               = "server-prometheus-path"
 )
 
 // FlagSet returns a pflag.FlagSet for CLI configuration.
@@ -289,6 +310,10 @@ func (c *Config) FlagSet() *pflag.FlagSet {
 	fs.StringVar(&c.Healthcheck.LivenessEndpoint, ServerHealthcheckLivenessEndpoint, c.Healthcheck.LivenessEndpoint, "Liveness check endpoint")
 	fs.StringVar(&c.Healthcheck.ReadinessEndpoint, ServerHealthcheckReadinessEndpoint, c.Healthcheck.ReadinessEndpoint, "Readiness check endpoint")
 	fs.StringVar(&c.Healthcheck.StartupEndpoint, ServerHealthcheckStartupEndpoint, c.Healthcheck.StartupEndpoint, "Startup check endpoint")
+
+	// Prometheus config
+	fs.BoolVar(&c.Prometheus.Enabled, ServerPrometheusEnabled, c.Prometheus.Enabled, "Enable Prometheus metrics")
+	fs.StringVar(&c.Prometheus.Path, ServerPrometheusPath, c.Prometheus.Path, "Prometheus metrics endpoint path")
 
 	return fs
 }
